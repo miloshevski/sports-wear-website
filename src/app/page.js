@@ -1,8 +1,9 @@
 import Image from "next/image";
+import Link from "next/link"; // ✅ Required to avoid ESLint build error
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-zinc-900">
       <Image
         src="/images/cycling-banner.jpg"
         alt="Cycling Banner"
