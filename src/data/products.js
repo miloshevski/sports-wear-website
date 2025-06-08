@@ -48,7 +48,7 @@ export const products = [
     id: "gloves2",
     name: "Winter Ride Gloves",
     category: "gloves",
-    price: 29.99,
+    price: 292.99,
     size: ["M", "L", "XL"],
     image: "/images/gloves2.jpg",
     description: "Insulated gloves for cold weather rides.",
