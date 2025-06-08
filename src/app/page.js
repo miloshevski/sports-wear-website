@@ -14,12 +14,12 @@ export default function Home() {
       <p className="text-lg text-center max-w-2xl mb-6">
         Discover the best cycling apparel and gear for your next adventure.
       </p>
-      <a
+      <Link
         href="/products"
         className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
       >
         Shop Now
-      </a>
+      </Link>
     </div>
   );
 }
