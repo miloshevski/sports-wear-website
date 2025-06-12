@@ -41,24 +41,32 @@ export default function AddProductPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setUploading(true);
+  e.preventDefault();
+  setUploading(true);
 
-    const imagePublicIds = [];
+  try {
+    const uploadedImages = await Promise.all(
+      form.images.map(async (file) => {
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "nextjs_shop"); // Use your preset
 
-    for (let file of form.images) {
-      const body = new FormData();
-      body.append("image", file);
+        const res = await fetch("https://api.cloudinary.com/v1_1/dh6mjupoi/image/upload", {
+          method: "POST",
+          body: data,
+        });
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body,
-      });
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error("Cloudinary upload failed:\n" + errorText);
+        }
 
-      const data = await res.json();
-      imagePublicIds.push(data.public_id); // ✅ Save public_id instead of url
-    }
+        const json = await res.json();
+        return json.public_id; // Store this in DB
+      })
+    );
 
+    // Send product to your backend with image public IDs
     const productRes = await fetch("/api/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -67,8 +75,11 @@ export default function AddProductPage() {
         category: form.category,
         price: parseFloat(form.price),
         description: form.description,
-        sizes: form.sizes,
-        images: imagePublicIds, // ✅ Send public_ids to backend
+        sizes: form.sizes.map((s) => ({
+          size: s.size,
+          quantity: parseInt(s.quantity),
+        })),
+        images: uploadedImages,
       }),
     });
 
@@ -76,11 +87,16 @@ export default function AddProductPage() {
       alert("✅ Product added!");
       router.push("/shop");
     } else {
-      alert("❌ Failed to add product");
+      const error = await productRes.json();
+      alert("❌ Failed to add product: " + (error.message || "Unknown error"));
     }
-
+  } catch (err) {
+    console.error("Upload failed", err);
+    alert(err.message || "❌ Something went wrong during upload.");
+  } finally {
     setUploading(false);
-  };
+  }
+};
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow border my-10">
