@@ -53,7 +53,13 @@ export default function OrderPage() {
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ customer, items: cart }),
+      body: JSON.stringify({
+        name: customer.name,
+        email: customer.email,
+        address: customer.address,
+        phone: customer.phone,
+        cart,
+      }),
     });
 
     setSubmitting(false);
