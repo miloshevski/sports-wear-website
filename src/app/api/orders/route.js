@@ -1,40 +1,29 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Order from "@/models/Order";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request) {
   try {
     await connectDB();
-
     const body = await request.json();
-
-    // DEBUG LOG
-    console.log("Received order body:", JSON.stringify(body, null, 2));
 
     const { name, email, address, phone, cart } = body;
 
-    if (!name || !email || !address || !phone) {
+    if (
+      !name?.trim() ||
+      !email?.trim() ||
+      !address?.trim() ||
+      !phone?.trim() ||
+      !Array.isArray(cart) ||
+      cart.length === 0
+    ) {
       return NextResponse.json(
-        { error: "Missing customer fields" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
-    }
-
-    if (!Array.isArray(cart) || cart.length === 0) {
-      return NextResponse.json(
-        { error: "Cart must be a non-empty array" },
-        { status: 400 }
-      );
-    }
-
-    // Optional: Validate productId, sizes, etc.
-    for (const item of cart) {
-      if (!item.productId || !item.name || !Array.isArray(item.sizes)) {
-        return NextResponse.json(
-          { error: "Invalid cart item structure" },
-          { status: 400 }
-        );
-      }
     }
 
     const order = new Order({
@@ -49,11 +38,48 @@ export async function POST(request) {
 
     await order.save();
 
+    // 💬 Compose confirmation email
+    const itemList = cart
+      .map((item) => {
+        const totalItemPrice = item.sizes.reduce(
+          (sum, s) => sum + s.quantity * item.price,
+          0
+        );
+        const sizeInfo = item.sizes
+          .map((s) => `${s.size} (${s.quantity})`)
+          .join(", ");
+
+        return `<li><strong>${item.name}</strong>: ${sizeInfo} – ${totalItemPrice} ден</li>`;
+      })
+      .join("");
+
+    const total = cart.reduce(
+      (sum, item) =>
+        sum + item.sizes.reduce((s, sz) => s + sz.quantity * item.price, 0),
+      0
+    );
+
+    const emailHTML = `
+      <h2>Потврда за нарачка</h2>
+      <p>Почитуван(а) ${name},</p>
+      <p>Ви благодариме за вашата нарачка. Еве ги деталите:</p>
+      <ul>${itemList}</ul>
+      <p><strong>Вкупна сума:</strong> ${total} ден</p>
+      <p>Ќе ве контактираме наскоро за испорака.</p>
+    `;
+
+    await resend.emails.send({
+      from: "onboarding@resend.dev", // Example: 'onboarding@resend.dev'
+      to: email,
+      subject: "Вашата нарачка е примена ✔",
+      html: emailHTML,
+    });
+
     return NextResponse.json({ message: "Order placed successfully!" });
   } catch (err) {
-    console.error("❌ Order creation failed:", err);
+    console.error("Order error:", err);
     return NextResponse.json(
-      { error: "Failed to place order", details: err.message },
+      { error: "Failed to place order" },
       { status: 500 }
     );
   }
