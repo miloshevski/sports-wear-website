@@ -8,9 +8,10 @@ export async function POST(req) {
     const body = await req.json();
 
     const product = await Product.create(body);
-    return NextResponse.json({ message: "Product created", product });
+
+    return NextResponse.json(product, { status: 201 });
   } catch (err) {
-    console.error("POST /api/products error:", err);
+    console.error("❌ Failed to create product", err);
     return NextResponse.json(
       { error: "Failed to create product" },
       { status: 500 }
@@ -22,9 +23,9 @@ export async function GET() {
   try {
     await connectDB();
     const products = await Product.find().sort({ createdAt: -1 });
+
     return NextResponse.json(products);
   } catch (err) {
-    console.error("GET /api/products error:", err);
     return NextResponse.json(
       { error: "Failed to fetch products" },
       { status: 500 }

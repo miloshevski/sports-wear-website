@@ -1,4 +1,7 @@
+// src/app/api/upload/route.js
+
 import { v2 as cloudinary } from "cloudinary";
+import { Readable } from "stream";
 import { NextResponse } from "next/server";
 
 cloudinary.config({
@@ -8,22 +11,24 @@ cloudinary.config({
 });
 
 export async function POST(req) {
-  const data = await req.formData();
-  const file = data.get("image");
+  const formData = await req.formData();
+  const file = formData.get("image");
 
   if (!file) {
-    return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    return NextResponse.json({ error: "No image provided" }, { status: 400 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const result = await new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream({ folder: "cyclefit" }, (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
-      })
-      .end(buffer);
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: "products" },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    Readable.from(buffer).pipe(uploadStream);
   });
 
   return NextResponse.json({

@@ -1,10 +1,14 @@
 "use client";
+
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function ProductCard({ product }) {
+  const { data: session } = useSession();
   const cloudName = "dh6mjupoi";
   const images = product.images || [];
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
 
   const getImageUrl = (publicId) => {
     return `https://res.cloudinary.com/${cloudName}/image/upload/w_600,c_fit,f_auto,q_auto/${publicId}.jpg`;
@@ -17,6 +21,29 @@ export default function ProductCard({ product }) {
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(`Delete product "${product.name}"?`);
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/products/${product._id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        alert("Product deleted.");
+        setVisible(false);
+      } else {
+        alert("Failed to delete product.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting product.");
+    }
+  };
+
+  if (!visible) return null;
 
   return (
     <div className="w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
@@ -60,7 +87,9 @@ export default function ProductCard({ product }) {
       <div className="p-4">
         <h2 className="text-lg font-semibold text-zinc-800">{product.name}</h2>
         <p className="text-sm text-gray-500 capitalize">{product.category}</p>
-        <p className="text-base font-bold text-zinc-900 mt-1">${product.price}</p>
+        <p className="text-base font-bold text-zinc-900 mt-1">
+          ${product.price}
+        </p>
 
         <div className="mt-3">
           <p className="text-sm font-medium text-gray-700 mb-1">Sizes:</p>
@@ -75,6 +104,16 @@ export default function ProductCard({ product }) {
             ))}
           </div>
         </div>
+
+        {/* Admin Delete Button */}
+        {session?.user?.isAdmin && (
+          <button
+            onClick={handleDelete}
+            className="mt-4 text-sm text-red-600 hover:underline"
+          >
+            🗑 Delete Product
+          </button>
+        )}
       </div>
     </div>
   );

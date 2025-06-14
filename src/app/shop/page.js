@@ -1,27 +1,97 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 
-async function getProducts() {
-  const res = await fetch("https://sports-wear-website.vercel.app/api/products", {
-    cache: "no-store",
-  });
-  return res.json();
-}
+export default function ShopPage() {
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
 
-export default async function ShopPage() {
-  const products = await getProducts();
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [maxPrice, setMaxPrice] = useState("");
+
+  // Fetch products and categories on mount
+  useEffect(() => {
+    async function fetchData() {
+      const productRes = await fetch("/api/products");
+      const categoryRes = await fetch("/api/categories");
+
+      const productsData = await productRes.json();
+      const categoryData = await categoryRes.json();
+
+      setProducts(productsData);
+      setFilteredProducts(productsData);
+      setCategories(categoryData.map((c) => c.name));
+    }
+
+    fetchData().catch(console.error);
+  }, []);
+
+  // Apply filters whenever inputs change
+  useEffect(() => {
+    const filtered = products.filter((product) => {
+      const matchCategory =
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(product.category);
+
+      const matchPrice = !maxPrice || product.price <= parseFloat(maxPrice);
+
+      return matchCategory && matchPrice;
+    });
+
+    setFilteredProducts(filtered);
+  }, [selectedCategories, maxPrice, products]);
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  };
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4">Shop</h1>
 
-      {/* Filters can go here later */}
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-8 mb-6">
+        {/* Category filter */}
+        <div>
+          <h2 className="font-semibold mb-2">Categories</h2>
+          {categories.map((category) => (
+            <label key={category} className="block text-sm">
+              <input
+                type="checkbox"
+                checked={selectedCategories.includes(category)}
+                onChange={() => handleCategoryChange(category)}
+                className="mr-2"
+              />
+              {category}
+            </label>
+          ))}
+        </div>
 
+        {/* Price filter */}
+        <div>
+          <h2 className="font-semibold mb-2">Max Price (€)</h2>
+          <input
+            type="number"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            placeholder="e.g. 50"
+            className="border border-gray-300 rounded px-3 py-1"
+          />
+        </div>
+      </div>
+
+      {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
-  {products.map((product) => (
-    <ProductCard key={product._id} product={product} />
-  ))}
-</div>
-
+        {filteredProducts.map((product) => (
+          <ProductCard key={product._id} product={product} />
+        ))}
+      </div>
     </div>
   );
 }
