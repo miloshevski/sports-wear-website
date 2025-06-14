@@ -50,6 +50,7 @@ export default function ProductDetailPage() {
     const cartItem = {
       productId: product._id,
       name: product.name,
+      price: product.price,
       sizes: selectedSizes.map(({ size, quantity }) => ({ size, quantity })),
     };
 

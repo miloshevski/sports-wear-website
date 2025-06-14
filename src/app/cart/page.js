@@ -8,6 +8,17 @@ export default function CartPage() {
 
   const isEmpty = cart.length === 0;
 
+  const totalItems = cart.reduce(
+    (sum, item) => sum + item.sizes.reduce((acc, s) => acc + s.quantity, 0),
+    0
+  );
+
+  const totalPrice = cart.reduce(
+    (sum, item) =>
+      sum + item.sizes.reduce((acc, s) => acc + s.quantity * item.price, 0),
+    0
+  );
+
   return (
     <div className="max-w-3xl mx-auto mt-10 p-4 bg-white border rounded">
       <h1 className="text-2xl font-bold mb-4">🛒 Кошничка</h1>
@@ -22,8 +33,8 @@ export default function CartPage() {
               <ul className="text-sm mt-2">
                 {item.sizes.map((s, i) => (
                   <li key={i}>
-                    Големина: <strong>{s.size}</strong>, Количина:{" "}
-                    <strong>{s.quantity}</strong>
+                    {item.name} – <strong>{s.size}</strong> ({s.quantity}) ={" "}
+                    <strong>{s.quantity * item.price} ден</strong>
                   </li>
                 ))}
               </ul>
@@ -35,6 +46,11 @@ export default function CartPage() {
               </button>
             </div>
           ))}
+
+          <div className="mt-6 text-right text-sm">
+            <p className="font-semibold">Вкупно производи: {totalItems}</p>
+            <p className="font-bold text-lg">Вкупна сума: {totalPrice} ден</p>
+          </div>
 
           <Link
             href="/order"
