@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { redirect, useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useCart } from "@/lib/useCart";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
   const { addItem } = useCart();
   const [product, setProduct] = useState(null);
   const [quantities, setQuantities] = useState({});
@@ -24,21 +25,38 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     const selectedSizes = Object.entries(quantities)
       .filter(([, qty]) => qty > 0)
-      .map(([size, quantity]) => ({ size, quantity }));
+      .map(([size, quantity]) => {
+        const matchingSize = product.sizes.find((s) => s.size === size);
+        const available = matchingSize ? matchingSize.quantity : 0;
+        return { size, quantity, available };
+      });
 
     if (selectedSizes.length === 0) {
       alert("Избери барем една големина и количина.");
       return;
     }
 
-    addItem({
+    const overstocked = selectedSizes.find(
+      ({ quantity, available }) => quantity > available
+    );
+
+    if (overstocked) {
+      alert(
+        `Немаш доволно залиха за големина ${overstocked.size}. Максимум е ${overstocked.available}.`
+      );
+      return;
+    }
+
+    const cartItem = {
       productId: product._id,
       name: product.name,
-      sizes: selectedSizes,
-    });
+      sizes: selectedSizes.map(({ size, quantity }) => ({ size, quantity })),
+    };
+
+    addItem(cartItem);
 
     alert("Додадено во кошничка!");
-    redirect("/shop");
+    router.push("/shop");
   };
 
   if (!product) return <p>Се вчитува...</p>;
@@ -59,12 +77,15 @@ export default function ProductDetailPage() {
               min={0}
               max={s.quantity}
               value={quantities[s.size] || ""}
-              onChange={(e) =>
+              onChange={(e) => {
+                let input = parseInt(e.target.value) || 0;
+                const clamped = Math.max(0, Math.min(input, s.quantity));
+
                 setQuantities({
                   ...quantities,
-                  [s.size]: parseInt(e.target.value) || 0,
-                })
-              }
+                  [s.size]: clamped,
+                });
+              }}
               className="border p-1 w-16"
             />
             <span className="text-xs text-gray-500">
