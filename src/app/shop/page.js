@@ -53,13 +53,13 @@ export default function ShopPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Shop</h1>
+      <h1 className="text-3xl font-bold mb-4">Продавница</h1>
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-8 mb-6">
         {/* Category filter */}
         <div>
-          <h2 className="font-semibold mb-2">Categories</h2>
+          <h2 className="font-semibold mb-2">Категории</h2>
           {categories.map((category) => (
             <label key={category} className="block text-sm">
               <input
@@ -75,12 +75,12 @@ export default function ShopPage() {
 
         {/* Price filter */}
         <div>
-          <h2 className="font-semibold mb-2">Max Price (€)</h2>
+          <h2 className="font-semibold mb-2">Макс Цена (МКД)</h2>
           <input
             type="number"
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
-            placeholder="e.g. 50"
+            placeholder="Внеси максимална цена"
             className="border border-gray-300 rounded px-3 py-1"
           />
         </div>
