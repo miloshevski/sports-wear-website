@@ -69,7 +69,7 @@ export async function POST(request) {
     `;
 
     await resend.emails.send({
-      from: "onboarding@resend.dev", // Example: 'onboarding@resend.dev'
+      from: process.env.EMAIL_FROM, // Example: 'onboarding@resend.dev'
       to: email,
       subject: "Вашата нарачка е примена ✔",
       html: emailHTML,
