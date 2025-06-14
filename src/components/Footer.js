@@ -6,15 +6,6 @@ export default function Footer() {
         <a href="#" className="hover:text-blue-600 transition">
           Instagram
         </a>
-        <a href="#" className="hover:text-blue-600 transition">
-          GitHub
-        </a>
-        <a
-          href="mailto:info@cyclefit.com"
-          className="hover:text-blue-600 transition"
-        >
-          Email
-        </a>
       </div>
     </footer>
   );
