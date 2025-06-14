@@ -1,53 +1,38 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+"use client";
 
-export const useCart = create(
-  persist(
-    (set, get) => ({
-      items: [],
-      addItem: (item) => {
-        const items = get().items;
-        const existingIndex = items.findIndex(
-          (i) => i.productId === item.productId
-        );
+import { createContext, useContext, useEffect, useState } from "react";
 
-        if (existingIndex !== -1) {
-          const updated = [...items];
-          updated[existingIndex].sizes = mergeSizes(
-            updated[existingIndex].sizes,
-            item.sizes
-          );
-          set({ items: updated });
-        } else {
-          set({ items: [...items, item] });
-        }
-      },
-      removeItem: (productId) => {
-        const items = get().items.filter((i) => i.productId !== productId);
-        set({ items });
-      },
-      clearCart: () => set({ items: [] }),
-    }),
-    {
-      name: "cart-storage",
+const CartContext = createContext();
+
+export function CartProvider({ children }) {
+  const [cart, setCart] = useState([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("cart");
+    if (stored) {
+      setCart(JSON.parse(stored));
     }
-  )
-);
+  }, []);
 
-function mergeSizes(existingSizes, newSizes) {
-  const map = {};
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
-  existingSizes.forEach(({ size, quantity }) => {
-    map[size] = quantity;
-  });
+  const addItem = (item) => {
+    setCart((prev) => [...prev, item]);
+  };
 
-  newSizes.forEach(({ size, quantity }) => {
-    if (map[size]) {
-      map[size] += quantity;
-    } else {
-      map[size] = quantity;
-    }
-  });
+  const removeItem = (index) => {
+    setCart((prev) => prev.filter((_, i) => i !== index));
+  };
 
-  return Object.entries(map).map(([size, quantity]) => ({ size, quantity }));
+  return (
+    <CartContext.Provider value={{ cart, addItem, removeItem }}>
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+export function useCart() {
+  return useContext(CartContext);
 }

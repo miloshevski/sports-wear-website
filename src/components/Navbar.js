@@ -17,7 +17,7 @@ export default function Navbar() {
             <Link href="/contact">Контакт</Link>
           </li>
           <li>
-            <Link href="/about">За Нас</Link>
+            <Link href="/cart">Кошничка</Link>
           </li>
         </ul>
       </div>

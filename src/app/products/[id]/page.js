@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import { useCart } from "@/lib/useCart";
 
 export default function ProductDetailPage() {
@@ -38,6 +38,7 @@ export default function ProductDetailPage() {
     });
 
     alert("Додадено во кошничка!");
+    redirect("/shop");
   };
 
   if (!product) return <p>Се вчитува...</p>;
