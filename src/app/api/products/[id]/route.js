@@ -10,8 +10,30 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export async function DELETE(request, context) {
-  const { id } = context.params;
+// GET a single product by ID
+export async function GET(_request, contextPromise) {
+  const { params } = await contextPromise;
+  const { id } = params;
+
+  await connectDB();
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid product ID" }, { status: 400 });
+  }
+
+  const product = await Product.findById(id);
+
+  if (!product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(product);
+}
+
+// DELETE a product by ID
+export async function DELETE(_request, contextPromise) {
+  const { params } = await contextPromise;
+  const { id } = params;
 
   await connectDB();
 
@@ -25,8 +47,8 @@ export async function DELETE(request, context) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  // Optional: Delete associated images from Cloudinary
-  if (deletedProduct.images && deletedProduct.images.length > 0) {
+  // Optional: Delete associated Cloudinary images
+  if (deletedProduct.images?.length > 0) {
     for (const publicId of deletedProduct.images) {
       try {
         await cloudinary.uploader.destroy(publicId);
