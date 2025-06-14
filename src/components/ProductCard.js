@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function ProductCard({ product }) {
   const { data: session } = useSession();
@@ -11,7 +12,7 @@ export default function ProductCard({ product }) {
   const [visible, setVisible] = useState(true);
 
   const getImageUrl = (publicId) => {
-    return `https://res.cloudinary.com/${cloudName}/image/upload/w_600,c_fit,f_auto,q_auto/${publicId}.jpg`;
+    return `https://res.cloudinary.com/${cloudName}/image/upload/w_600,c_fit,f_auto,q_auto/${publicId}`;
   };
 
   const handlePrev = () => {
@@ -114,6 +115,14 @@ export default function ProductCard({ product }) {
             🗑 Delete Product
           </button>
         )}
+
+        {/* Нарачај Button */}
+        <Link
+          href={`/products/${product._id}`}
+          className="mt-4 block text-center bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+        >
+          Нарачај
+        </Link>
       </div>
     </div>
   );
