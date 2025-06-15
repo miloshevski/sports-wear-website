@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProductCard({ product }) {
   const { data: session } = useSession();
@@ -52,10 +53,11 @@ export default function ProductCard({ product }) {
       <div className="relative w-full h-[280px] bg-zinc-100">
         {images.length > 0 ? (
           <>
-            <img
+            <Image
               src={getImageUrl(images[currentIndex])}
               alt={product.name}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
               loading="lazy"
             />
             {images.length > 1 && (
@@ -76,10 +78,11 @@ export default function ProductCard({ product }) {
             )}
           </>
         ) : (
-          <img
+          <Image
             src="/placeholder.jpg"
             alt="No image"
-            className="w-full h-full object-contain"
+            fill
+            className="object-contain"
           />
         )}
       </div>
