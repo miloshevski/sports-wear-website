@@ -14,22 +14,22 @@ export default async function AdminPage() {
   return (
     <div className="max-w-2xl mx-auto mt-32 p-10 bg-white rounded-2xl shadow-lg border text-center">
       <h1 className="text-3xl font-bold mb-4 text-zinc-800">
-        Welcome, Admin 👋
+        Добредојде Ана/Марио/Аце
       </h1>
       <p className="mb-10 text-zinc-600 text-lg">
-        Logged in as <span className="font-semibold">{session.user.email}</span>
+        Логиран како <span className="font-semibold">{session.user.email}</span>
       </p>
 
       <div className="flex flex-col items-center gap-6">
         <Link href="/admin/add">
           <button className="w-64 py-4 text-lg bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-sm">
-            ➕ Add New Product
+            ➕ Додади продукт
           </button>
         </Link>
 
         <Link href="/admin/orders">
           <button className="w-64 py-4 text-lg bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-sm">
-            📦 View Orders
+            📦 Прегледај нарачки
           </button>
         </Link>
 
@@ -38,7 +38,7 @@ export default async function AdminPage() {
             type="submit"
             className="w-64 py-4 text-lg bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all shadow-sm"
           >
-            🔓 Logout
+            🔓 Одјава
           </button>
         </form>
       </div>

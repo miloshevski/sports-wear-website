@@ -25,15 +25,16 @@ export async function sendConfirmationEmail({ name, email, cart }) {
       <ul>${productList}</ul>
       <p><strong>Вкупна сума:</strong> ${total} ден</p>
       <p>Ќе те контактираме наскоро за потврда и испорака.</p>
-      <p>Тимот на CycleFit</p>
+      <p>Тимот на Спортска Опрема</p>
+      <p>-Ова е автоматска порака, ве молиме не одговарајте.</p>
     </div>
   `;
 
   try {
     const data = await resend.emails.send({
-      from: process.env.EMAIL_FROM, // e.g. 'onboarding@resend.dev'
+      from: process.env.EMAIL_FROM, // 
       to: email,
-      subject: "Потврда за нарачка – CycleFit",
+      subject: "Потврда за нарачка – Спортска Опрема",
       html,
     });
 

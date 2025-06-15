@@ -1,10 +1,21 @@
-import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Order from "@/models/Order";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// GET - fetch all orders
+export async function GET() {
+  try {
+    await connectDB();
+    const orders = await Order.find().sort({ createdAt: -1 });
+    return new Response(JSON.stringify(orders));
+  } catch (err) {
+    return new Response("Failed to fetch orders", { status: 500 });
+  }
+}
+
+// ✅ POST - create a new order
 export async function POST(request) {
   try {
     await connectDB();
@@ -20,10 +31,7 @@ export async function POST(request) {
       !Array.isArray(cart) ||
       cart.length === 0
     ) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
     }
 
     const order = new Order({
@@ -38,49 +46,37 @@ export async function POST(request) {
 
     await order.save();
 
-    // 💬 Compose confirmation email
-    const itemList = cart
-      .map((item) => {
-        const totalItemPrice = item.sizes.reduce(
-          (sum, s) => sum + s.quantity * item.price,
-          0
-        );
-        const sizeInfo = item.sizes
-          .map((s) => `${s.size} (${s.quantity})`)
-          .join(", ");
+    // Optional: send confirmation email
+    const itemList = cart.map((item) => {
+      const total = item.sizes.reduce((sum, s) => sum + s.quantity * item.price, 0);
+      const sizeInfo = item.sizes.map((s) => `${s.size} (${s.quantity})`).join(", ");
+      return `<li><strong>${item.name}</strong>: ${sizeInfo} – ${total} ден</li>`;
+    }).join("");
 
-        return `<li><strong>${item.name}</strong>: ${sizeInfo} – ${totalItemPrice} ден</li>`;
-      })
-      .join("");
-
-    const total = cart.reduce(
+    const totalPrice = cart.reduce(
       (sum, item) =>
         sum + item.sizes.reduce((s, sz) => s + sz.quantity * item.price, 0),
       0
     );
 
-    const emailHTML = `
+    const html = `
       <h2>Потврда за нарачка</h2>
       <p>Почитуван(а) ${name},</p>
-      <p>Ви благодариме за вашата нарачка. Еве ги деталите:</p>
+      <p>Ви благодариме за вашата нарачка:</p>
       <ul>${itemList}</ul>
-      <p><strong>Вкупна сума:</strong> ${total} ден</p>
-      <p>Ќе ве контактираме наскоро за испорака.</p>
+      <p><strong>Вкупна сума:</strong> ${totalPrice} ден</p>
     `;
 
     await resend.emails.send({
-      from: process.env.EMAIL_FROM, // Example: 'onboarding@resend.dev'
+      from: process.env.EMAIL_FROM,
       to: email,
       subject: "Вашата нарачка е примена ✔",
-      html: emailHTML,
+      html,
     });
 
-    return NextResponse.json({ message: "Order placed successfully!" });
+    return new Response(JSON.stringify({ message: "Order placed!" }), { status: 201 });
   } catch (err) {
     console.error("Order error:", err);
-    return NextResponse.json(
-      { error: "Failed to place order" },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
   }
 }
