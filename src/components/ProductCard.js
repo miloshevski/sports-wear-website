@@ -92,7 +92,7 @@ export default function ProductCard({ product }) {
         <h2 className="text-lg font-semibold text-zinc-800">{product.name}</h2>
         <p className="text-sm text-gray-500 capitalize">{product.category}</p>
         <p className="text-base font-bold text-zinc-900 mt-1">
-          ${product.price}
+          {product.price} Ден.
         </p>
 
         <div className="mt-3">

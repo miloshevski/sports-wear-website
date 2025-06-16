@@ -31,7 +31,10 @@ export async function POST(request) {
       !Array.isArray(cart) ||
       cart.length === 0
     ) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        { status: 400 }
+      );
     }
 
     const order = new Order({
@@ -46,12 +49,18 @@ export async function POST(request) {
 
     await order.save();
 
-    // Optional: send confirmation email
-    const itemList = cart.map((item) => {
-      const total = item.sizes.reduce((sum, s) => sum + s.quantity * item.price, 0);
-      const sizeInfo = item.sizes.map((s) => `${s.size} (${s.quantity})`).join(", ");
-      return `<li><strong>${item.name}</strong>: ${sizeInfo} – ${total} ден</li>`;
-    }).join("");
+    const itemList = cart
+      .map((item) => {
+        const total = item.sizes.reduce(
+          (sum, s) => sum + s.quantity * item.price,
+          0
+        );
+        const sizeInfo = item.sizes
+          .map((s) => `${s.size} (${s.quantity})`)
+          .join(", ");
+        return `<li><strong>${item.name}</strong>: ${sizeInfo} – ${total} ден</li>`;
+      })
+      .join("");
 
     const totalPrice = cart.reduce(
       (sum, item) =>
@@ -59,7 +68,8 @@ export async function POST(request) {
       0
     );
 
-    const html = `
+    // ✅ Email to customer
+    const customerHtml = `
       <h2>Потврда за нарачка</h2>
       <p>Почитуван(а) ${name},</p>
       <p>Ви благодариме за вашата нарачка:</p>
@@ -71,12 +81,35 @@ export async function POST(request) {
       from: process.env.EMAIL_FROM,
       to: email,
       subject: "Вашата нарачка е примена ✔",
-      html,
+      html: customerHtml,
     });
 
-    return new Response(JSON.stringify({ message: "Order placed!" }), { status: 201 });
+    // ✅ Email to admin
+    const adminHtml = `
+      <h2>🔔 Нова нарачка!</h2>
+      <p><strong>Име:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Телефон:</strong> ${phone}</p>
+      <p><strong>Адреса:</strong> ${address}</p>
+      <p><strong>Производи:</strong></p>
+      <ul>${itemList}</ul>
+      <p><strong>Вкупна цена:</strong> ${totalPrice} ден</p>
+    `;
+
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM,
+      to: "milosevskialeksandar18@gmail.com", // ✅ change this to your actual email
+      subject: "🛒 Нова нарачка во продавницата",
+      html: adminHtml,
+    });
+
+    return new Response(JSON.stringify({ message: "Order placed!" }), {
+      status: 201,
+    });
   } catch (err) {
     console.error("Order error:", err);
-    return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Server error" }), {
+      status: 500,
+    });
   }
 }

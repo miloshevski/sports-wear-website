@@ -8,8 +8,8 @@ import { CartProvider } from "@/lib/useCart"; // ✅ ADD THIS
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "CycleFit – Cycling Sportswear",
-  description: "Shop professional cycling apparel and gear.",
+  title: "Велосипедска опрема",
+  description: "Купете велосипедска опрема со белгиски квалитет.",
 };
 
 export default function RootLayout({ children }) {

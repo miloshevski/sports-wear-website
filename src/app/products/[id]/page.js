@@ -66,7 +66,7 @@ export default function ProductDetailPage() {
     <div className="max-w-xl mx-auto mt-6 p-4 border rounded bg-white">
       <h1 className="text-xl font-bold">{product.name}</h1>
       <p className="text-sm text-gray-600 capitalize">{product.category}</p>
-      <p className="font-bold text-lg mt-2">${product.price}</p>
+      <p className="font-bold text-lg mt-2">{product.price} Ден.</p>
 
       <div className="mt-4">
         <p className="text-sm font-semibold">Одбери големина и количина:</p>

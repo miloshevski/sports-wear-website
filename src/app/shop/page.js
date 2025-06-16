@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 
 export default function ShopPage() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category");
+
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -21,12 +25,25 @@ export default function ShopPage() {
       const categoryData = await categoryRes.json();
 
       setProducts(productsData);
-      setFilteredProducts(productsData);
       setCategories(categoryData.map((c) => c.name));
+
+      // ✅ If there's a ?category=X in the URL, apply it as the initial filter
+      if (
+        initialCategory &&
+        categoryData.some((c) => c.name === initialCategory)
+      ) {
+        setSelectedCategories([initialCategory]);
+        const filtered = productsData.filter(
+          (product) => product.category === initialCategory
+        );
+        setFilteredProducts(filtered);
+      } else {
+        setFilteredProducts(productsData);
+      }
     }
 
     fetchData().catch(console.error);
-  }, []);
+  }, [initialCategory]);
 
   // Apply filters whenever inputs change
   useEffect(() => {

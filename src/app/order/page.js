@@ -88,13 +88,14 @@ export default function OrderPage() {
         />
         <input
           name="address"
-          placeholder="Адреса"
+          placeholder="Адреса (улица, град, поштенски број)"
           value={customer.address}
           onChange={handleChange}
           className="w-full border p-2"
           required
         />
         <input
+          type="phone"
           name="phone"
           placeholder="Телефон"
           value={customer.phone}

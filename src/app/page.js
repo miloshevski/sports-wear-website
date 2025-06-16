@@ -1,11 +1,14 @@
-import Link from 'next/link';
-import Image from 'next/image';
+import Link from "next/link";
+import Image from "next/image";
 
 async function getCategories() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/categories`, {
-    cache: 'no-store',
-  });
-  if (!res.ok) throw new Error('Failed to fetch categories');
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/categories`,
+    {
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) throw new Error("Failed to fetch categories");
   return res.json();
 }
 
@@ -27,8 +30,8 @@ export default async function Home() {
           Добредојдовте во нашата онлајн продавница
         </h1>
         <p className="text-base sm:text-lg max-w-xl mb-6 sm:mb-8">
-          Премиум облека за велосипедизам дизајнирана за перформанси, удобност и стил.
-          Купете дресови, шорцеви, ракавици и многу повеќе.
+          Премиум облека за велосипедизам дизајнирана за перформанси, удобност и
+          стил. Купете дресови, шорцеви, ракавици и многу повеќе.
         </p>
         <Link
           href="/shop"
@@ -62,7 +65,9 @@ export default async function Home() {
 
       {/* Call to Action */}
       <section className="mt-16 sm:mt-24 bg-blue-100 rounded-xl p-6 sm:p-10 text-center">
-        <h2 className="text-xl sm:text-2xl font-bold mb-2">Останете во водство</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-2">
+          Останете во водство
+        </h2>
         <p className="text-sm sm:text-base mb-4">
           Пријавете се за новости за нови производи и ексклузивни попусти.
         </p>
