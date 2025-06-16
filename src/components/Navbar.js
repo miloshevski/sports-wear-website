@@ -45,6 +45,9 @@ export default function Navbar() {
         {/* Desktop nav */}
         <ul className="hidden sm:flex gap-6 text-zinc-700 font-medium">
           <li>
+            <Link href="/">Дома</Link>
+          </li>
+          <li>
             <Link href="/shop">Продавница</Link>
           </li>
           <li>
@@ -57,11 +60,16 @@ export default function Navbar() {
       {menuOpen && (
         <ul className="sm:hidden flex flex-col items-center gap-4 pb-4 text-zinc-700 font-medium bg-white border-t border-zinc-200">
           <li>
+            <Link href="/" onClick={() => setMenuOpen(false)}>
+              Дома
+            </Link>
+          </li>
+          <li>
             <Link href="/shop" onClick={() => setMenuOpen(false)}>
               Продавница
             </Link>
           </li>
-          
+
           <li>
             <Link href="/cart" onClick={() => setMenuOpen(false)}>
               🛒Кошничка

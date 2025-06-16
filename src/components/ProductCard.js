@@ -12,6 +12,9 @@ export default function ProductCard({ product }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
+  const totalStock = product.sizes?.reduce((sum, s) => sum + s.quantity, 0);
+  const outOfStock = totalStock === 0;
+
   const getImageUrl = (publicId) => {
     return `https://res.cloudinary.com/${cloudName}/image/upload/w_600,c_fit,f_auto,q_auto/${publicId}`;
   };
@@ -51,6 +54,11 @@ export default function ProductCard({ product }) {
     <div className="w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
       {/* Image Slider */}
       <div className="relative w-full h-[280px] bg-zinc-100">
+        {outOfStock && (
+          <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full z-20 shadow">
+            ❌ Распродадено
+          </span>
+        )}
         {images.length > 0 ? (
           <>
             <Image
@@ -120,12 +128,21 @@ export default function ProductCard({ product }) {
         )}
 
         {/* Нарачај Button */}
-        <Link
-          href={`/products/${product._id}`}
-          className="mt-4 block text-center bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
-        >
-          Нарачај
-        </Link>
+        {outOfStock ? (
+          <button
+            disabled
+            className="mt-4 w-full text-center bg-gray-400 text-white px-4 py-2 rounded text-sm cursor-not-allowed"
+          >
+            ❌ Распродадено
+          </button>
+        ) : (
+          <Link
+            href={`/products/${product._id}`}
+            className="mt-4 block text-center bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+          >
+            Нарачај
+          </Link>
+        )}
       </div>
     </div>
   );

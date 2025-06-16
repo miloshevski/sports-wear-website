@@ -22,13 +22,14 @@ export default async function Home() {
         <Image
           src="/fitactive.png"
           alt="Cycling Banner"
-          width={300}
-          height={300}
-          className="w-full max-w-xs sm:max-w-sm mb-6 sm:mb-10"
+          width={200}
+          height={200}
+          className="max-w-xs sm:max-w-sm mb-6 sm:mb-10"
         />
         <h1 className="text-3xl sm:text-5xl font-extrabold mb-4">
           Добредојдовте во нашата онлајн продавница
         </h1>
+
         <p className="text-base sm:text-lg max-w-xl mb-6 sm:mb-8">
           Премиум облека за велосипедизам дизајнирана за перформанси, удобност и
           стил. Купете дресови, шорцеви, ракавици и многу повеќе.
@@ -61,19 +62,6 @@ export default async function Home() {
             ))}
           </div>
         )}
-      </section>
-
-      {/* Call to Action */}
-      <section className="mt-16 sm:mt-24 bg-blue-100 rounded-xl p-6 sm:p-10 text-center">
-        <h2 className="text-xl sm:text-2xl font-bold mb-2">
-          Останете во водство
-        </h2>
-        <p className="text-sm sm:text-base mb-4">
-          Пријавете се за новости за нови производи и ексклузивни попусти.
-        </p>
-        <button className="bg-blue-600 text-white px-5 sm:px-6 py-2 sm:py-2.5 rounded hover:bg-blue-700 transition">
-          Пријави се
-        </button>
       </section>
     </div>
   );
