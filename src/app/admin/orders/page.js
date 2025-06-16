@@ -21,7 +21,7 @@ export default function AdminOrdersPage() {
     if (res.ok) {
       setOrders((prev) => prev.filter((order) => order._id !== id));
     } else {
-      alert("Неуспешна обработка на нарачката.");
+      alert("Продуктот го нема на залиха! Автоматски ќе биде одбиен.");
     }
   };
 
@@ -44,12 +44,25 @@ export default function AdminOrdersPage() {
             );
 
             return (
-              <div key={order._id} className="border p-4 rounded-lg shadow bg-white">
-                <p><strong>Име:</strong> {order.name}</p>
-                <p><strong>Email:</strong> {order.email}</p>
-                <p><strong>Телефон:</strong> {order.phone}</p>
-                <p><strong>Адреса:</strong> {order.address}</p>
-                <p><strong>Статус:</strong> {order.status}</p>
+              <div
+                key={order._id}
+                className="border p-4 rounded-lg shadow bg-white"
+              >
+                <p>
+                  <strong>Име:</strong> {order.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {order.email}
+                </p>
+                <p>
+                  <strong>Телефон:</strong> {order.phone}
+                </p>
+                <p>
+                  <strong>Адреса:</strong> {order.address}
+                </p>
+                <p>
+                  <strong>Статус:</strong> {order.status}
+                </p>
                 <p className="font-semibold mt-2">Производи:</p>
                 <ul className="list-disc list-inside ml-4 text-sm">
                   {order.cart.map((item, i) => (
@@ -57,7 +70,9 @@ export default function AdminOrdersPage() {
                       {item.name} – {item.price} ден
                       <ul className="ml-4">
                         {item.sizes.map((s, j) => (
-                          <li key={j}>Големина {s.size}: {s.quantity} парчиња</li>
+                          <li key={j}>
+                            Големина {s.size}: {s.quantity} парчиња
+                          </li>
                         ))}
                       </ul>
                     </li>
