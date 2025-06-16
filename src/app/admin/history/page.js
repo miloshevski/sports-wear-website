@@ -1,11 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState([]);
   const [totalProfit, setTotalProfit] = useState(0);
   const [monthlyProfit, setMonthlyProfit] = useState(0);
+  const [monthlyData, setMonthlyData] = useState([]);
 
   useEffect(() => {
     async function fetchHistory() {
@@ -15,17 +25,32 @@ export default function OrderHistoryPage() {
       setOrders(data);
 
       const accepted = data.filter((o) => o.status === "accepted");
+
       setTotalProfit(accepted.reduce((sum, o) => sum + o.total, 0));
 
       const now = new Date();
+      const thisMonth = now.getMonth();
+      const thisYear = now.getFullYear();
+
       const monthly = accepted.filter((o) => {
         const d = new Date(o.createdAt);
-        return (
-          d.getMonth() === now.getMonth() &&
-          d.getFullYear() === now.getFullYear()
-        );
+        return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
       });
       setMonthlyProfit(monthly.reduce((sum, o) => sum + o.total, 0));
+
+      // Build profit per month data
+      const monthMap = Array.from({ length: 12 }, (_, i) => ({
+        name: new Date(0, i).toLocaleString("mk-MK", { month: "short" }),
+        profit: 0,
+      }));
+
+      for (const o of accepted) {
+        const d = new Date(o.createdAt);
+        const month = d.getMonth();
+        monthMap[month].profit += o.total;
+      }
+
+      setMonthlyData(monthMap);
     }
 
     fetchHistory();
@@ -52,6 +77,23 @@ export default function OrderHistoryPage() {
         </div>
       </div>
 
+      {/* 📊 Monthly Profit Graph */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mb-10">
+        <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
+          📊 Добивка по Месеци
+        </h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={monthlyData}>
+            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.1} />
+            <XAxis dataKey="name" stroke="#888" />
+            <YAxis stroke="#888" />
+            <Tooltip />
+            <Bar dataKey="profit" fill="#10b981" radius={[8, 8, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* 🧾 Order Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.map((order) => (
           <div
