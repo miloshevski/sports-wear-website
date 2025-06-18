@@ -51,9 +51,9 @@ export default function ProductCard({ product }) {
   if (!visible) return null;
 
   return (
-    <div className="w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
+    <div className="w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
       {/* Image Slider */}
-      <div className="relative w-full h-[280px] bg-zinc-100">
+      <div className="relative w-full h-[280px] bg-zinc-100 shrink-0">
         {outOfStock && (
           <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full z-20 shadow">
             ❌ Распродадено
@@ -96,12 +96,19 @@ export default function ProductCard({ product }) {
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
+      <div className="p-4 flex flex-col h-full">
         <h2 className="text-lg font-semibold text-zinc-800">{product.name}</h2>
         <p className="text-sm text-gray-500 capitalize">{product.category}</p>
         <p className="text-base font-bold text-zinc-900 mt-1">
           {product.price} Ден.
         </p>
+
+        {/* 🆕 Description */}
+        {product.description && (
+          <p className="text-sm text-gray-700 mt-2 line-clamp-3 min-h-[3.6em]">
+            {product.description}
+          </p>
+        )}
 
         <div className="mt-3">
           <p className="text-sm font-medium text-gray-700 mb-1">Sizes:</p>
@@ -116,6 +123,9 @@ export default function ProductCard({ product }) {
             ))}
           </div>
         </div>
+
+        {/* Push buttons to bottom */}
+        <div className="flex-grow" />
 
         {/* Admin Delete Button */}
         {session?.user?.isAdmin && (

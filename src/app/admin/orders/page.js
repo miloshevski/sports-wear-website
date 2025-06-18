@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -11,11 +12,18 @@ export default function AdminOrdersPage() {
       .then((data) => setOrders(data));
   }, []);
 
+  const getImageUrl = (publicId) => {
+    if (publicId && typeof publicId === "string") {
+      return `https://res.cloudinary.com/dh6mjupoi/image/upload/w_80,h_80,c_fill,f_auto,q_40/${publicId}`;
+    }
+    return null;
+  };
+
   const handleAction = async (id, action) => {
     const res = await fetch(`/api/orders/${id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action }), // "accept" or "decline"
+      body: JSON.stringify({ action }),
     });
 
     if (res.ok) {
@@ -33,6 +41,7 @@ export default function AdminOrdersPage() {
       ) : (
         <div className="space-y-6">
           {orders.map((order) => {
+            console.log("📦 Order cart contents:", order.cart);
             const total = order.cart.reduce(
               (sum, item) =>
                 sum +
@@ -64,21 +73,42 @@ export default function AdminOrdersPage() {
                   <strong>Статус:</strong> {order.status}
                 </p>
                 <p className="font-semibold mt-2">Производи:</p>
-                <ul className="list-disc list-inside ml-4 text-sm">
-                  {order.cart.map((item, i) => (
-                    <li key={i}>
-                      {item.name} – {item.price} ден
-                      <ul className="ml-4">
-                        {item.sizes.map((s, j) => (
-                          <li key={j}>
-                            Големина {s.size}: {s.quantity} парчиња
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
+                <ul className="space-y-4 mt-2 ml-2">
+                  {order.cart.map((item, i) => {
+                    const firstImage = item.images?.[0];
+                    const imageUrl = getImageUrl(firstImage);
+                    console.log("🖼️ Preview image:", firstImage, "→", imageUrl);
+
+                    return (
+                      <li key={i} className="flex gap-4 items-start">
+                        {imageUrl && (
+                          <div className="relative w-20 h-20 rounded overflow-hidden bg-zinc-100 shrink-0">
+                            <Image
+                              src={imageUrl}
+                              alt={item.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="text-sm">
+                          <p className="font-medium">
+                            {item.name} – {item.price} ден
+                          </p>
+                          <ul className="ml-4 list-disc text-xs text-gray-700">
+                            {item.sizes.map((s, j) => (
+                              <li key={j}>
+                                Големина {s.size}: {s.quantity} парчиња
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
-                <p className="mt-2 font-bold">Вкупна сума: {total} ден</p>
+
+                <p className="mt-4 font-bold">Вкупна сума: {total} ден</p>
 
                 <div className="mt-4 flex gap-4">
                   <button

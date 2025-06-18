@@ -24,7 +24,7 @@ export async function DELETE(req, { params }) {
       0
     );
 
-    // 📝 Simplify product list for history DB
+    // 📝 Prepare simplified product list for history
     const simplifiedProducts = order.cart.flatMap((item) =>
       item.sizes.map((sz) => ({
         name: item.name,
@@ -33,7 +33,7 @@ export async function DELETE(req, { params }) {
       }))
     );
 
-    // 💌 Email setup
+    // 🖼 Prepare item list for email
     const itemList = order.cart
       .map((item) => {
         const sizeInfo = item.sizes
@@ -49,7 +49,7 @@ export async function DELETE(req, { params }) {
     if (action === "accept") {
       let outOfStock = false;
 
-      // 1️⃣ Validate all items first
+      // ✅ 1. Validate all stock
       for (const item of order.cart) {
         const product = await import("@/models/Product").then((mod) =>
           mod.default.findById(item.productId)
@@ -71,7 +71,7 @@ export async function DELETE(req, { params }) {
         if (outOfStock) break;
       }
 
-      // 2️⃣ If any item is out of stock, reject
+      // ❌ Reject if out of stock
       if (outOfStock) {
         return NextResponse.json(
           { error: "Cannot accept — one or more items are out of stock." },
@@ -79,7 +79,7 @@ export async function DELETE(req, { params }) {
         );
       }
 
-      // 3️⃣ Proceed to reduce stock
+      // ✅ 2. Update product stock
       for (const item of order.cart) {
         const product = await import("@/models/Product").then((mod) =>
           mod.default.findById(item.productId)
@@ -101,7 +101,18 @@ export async function DELETE(req, { params }) {
 
         await product.save();
       }
+
+      // ✅ 3. Set email content for accept
+      subject = "Вашата нарачка е прифатена ✅";
+      html = `
+        <p>Почитуван(а) ${order.name},</p>
+        <p>Вашата нарачка е прифатена и ќе биде испратена наскоро.</p>
+        <ul>${itemList}</ul>
+        <p><strong>Вкупна сума:</strong> ${total} ден</p>
+        <p>Ви благодариме за довербата!</p>
+      `;
     } else if (action === "decline") {
+      // ❌ Email content for decline
       subject = "Вашата нарачка не може да биде исполнета ❌";
       html = `
         <p>Почитуван(а) ${order.name},</p>
@@ -110,13 +121,17 @@ export async function DELETE(req, { params }) {
       `;
     }
 
-    // 📬 Send email
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM,
-      to: order.email,
-      subject,
-      html,
-    });
+    // 📬 Send email to customer
+    try {
+      await resend.emails.send({
+        from: process.env.EMAIL_FROM,
+        to: order.email,
+        subject,
+        html,
+      });
+    } catch (emailErr) {
+      console.error("❌ Failed to send email:", emailErr);
+    }
 
     // 🗃 Move to OrderHistory
     await OrderHistory.create({
@@ -134,7 +149,7 @@ export async function DELETE(req, { params }) {
 
     return NextResponse.json({ message: "Moved to history." });
   } catch (err) {
-    console.error("Error processing order:", err);
+    console.error("❌ Error processing order:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -10,6 +10,7 @@ const OrderSchema = new mongoose.Schema({
       productId: { type: mongoose.Schema.Types.ObjectId, required: true },
       name: String,
       price: Number,
+      images: [String], // ✅ Add this line
       sizes: [
         {
           size: String,

@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db";
 import Order from "@/models/Order";
+import Product from "@/models/Product";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -37,19 +38,34 @@ export async function POST(request) {
       );
     }
 
+    // ✅ Enrich cart with product images
+    const enrichedCart = await Promise.all(
+      cart.map(async (item) => {
+        if (!item.images || item.images.length === 0) {
+          const product = await Product.findById(item.productId);
+          return {
+            ...item,
+            images: product?.images || [],
+          };
+        }
+        return item;
+      })
+    );
+
+
     const order = new Order({
       name,
       email,
       address,
       phone,
-      cart,
+      cart: enrichedCart,
       status: "pending",
       createdAt: new Date(),
     });
 
     await order.save();
 
-    const itemList = cart
+    const itemList = enrichedCart
       .map((item) => {
         const total = item.sizes.reduce(
           (sum, s) => sum + s.quantity * item.price,
@@ -62,7 +78,7 @@ export async function POST(request) {
       })
       .join("");
 
-    const totalPrice = cart.reduce(
+    const totalPrice = enrichedCart.reduce(
       (sum, item) =>
         sum + item.sizes.reduce((s, sz) => s + sz.quantity * item.price, 0),
       0
@@ -98,7 +114,7 @@ export async function POST(request) {
 
     await resend.emails.send({
       from: process.env.EMAIL_FROM,
-      to: "milosevskialeksandar18@gmail.com", // ✅ change this to your actual email
+      to: "milosevskialeksandar18@gmail.com",
       subject: "🛒 Нова нарачка во продавницата",
       html: adminHtml,
     });

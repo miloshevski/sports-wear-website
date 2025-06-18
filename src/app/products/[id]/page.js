@@ -23,42 +23,44 @@ export default function ProductDetailPage() {
   }, [id]);
 
   const handleAddToCart = () => {
-    const selectedSizes = Object.entries(quantities)
-      .filter(([, qty]) => qty > 0)
-      .map(([size, quantity]) => {
-        const matchingSize = product.sizes.find((s) => s.size === size);
-        const available = matchingSize ? matchingSize.quantity : 0;
-        return { size, quantity, available };
-      });
+  const selectedSizes = Object.entries(quantities)
+    .filter(([, qty]) => qty > 0)
+    .map(([size, quantity]) => {
+      const matchingSize = product.sizes.find((s) => s.size === size);
+      const available = matchingSize ? matchingSize.quantity : 0;
+      return { size, quantity, available };
+    });
 
-    if (selectedSizes.length === 0) {
-      alert("Избери барем една големина и количина.");
-      return;
-    }
+  if (selectedSizes.length === 0) {
+    alert("Избери барем една големина и количина.");
+    return;
+  }
 
-    const overstocked = selectedSizes.find(
-      ({ quantity, available }) => quantity > available
+  const overstocked = selectedSizes.find(
+    ({ quantity, available }) => quantity > available
+  );
+
+  if (overstocked) {
+    alert(
+      `Немаш доволно залиха за големина ${overstocked.size}. Максимум е ${overstocked.available}.`
     );
+    return;
+  }
 
-    if (overstocked) {
-      alert(
-        `Немаш доволно залиха за големина ${overstocked.size}. Максимум е ${overstocked.available}.`
-      );
-      return;
-    }
-
-    const cartItem = {
-      productId: product._id,
-      name: product.name,
-      price: product.price,
-      sizes: selectedSizes.map(({ size, quantity }) => ({ size, quantity })),
-    };
-
-    addItem(cartItem);
-
-    alert("Додадено во кошничка!");
-    router.push("/shop");
+  const cartItem = {
+    productId: product._id,
+    name: product.name,
+    price: product.price,
+    sizes: selectedSizes.map(({ size, quantity }) => ({ size, quantity })),
+    images: product.images, // ✅ FIX HERE
   };
+
+  addItem(cartItem);
+
+  alert("Додадено во кошничка!");
+  router.push("/shop");
+};
+
 
   if (!product) return <p>Се вчитува...</p>;
 
