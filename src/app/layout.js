@@ -8,9 +8,34 @@ import { CartProvider } from "@/lib/useCart"; // ✅ ADD THIS
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Велосипедска опрема",
+  title: "Sportska Oprema",
   description: "Купете велосипедска опрема со белгиски квалитет.",
+  keywords: ["велосипедска опрема", "cycling jerseys", "спортска облека", "velosipedska oprema", "cycling clothing", "cyling gear"],
+  authors: [{ name: "Aleksandar Miloshevski", url: "https://miloshevski.info" }],
+  creator: "Aleksandar Miloshevski",
+  metadataBase: new URL("https://sportskaoprema.mk"),
+
+  openGraph: {
+    title: "Sportska Oprema",
+    description: "Висококвалитетна велосипедска облека достапна на sportskaoprema.mk",
+    url: "https://sportskaoprema.mk",
+    siteName: "Sportska Oprema",
+    images: [
+      {
+        url: "public/fitactive.png",
+        width: 1200,
+        height: 630,
+        alt: "FitActive – Велосипедска облека",
+      },
+    ],
+    locale: "mk_MK",
+    type: "website",
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
+
 
 export default function RootLayout({ children }) {
   return (
