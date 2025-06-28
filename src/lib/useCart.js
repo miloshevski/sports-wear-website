@@ -7,6 +7,7 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
+  // Load from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("cart");
     if (stored) {
@@ -14,6 +15,7 @@ export function CartProvider({ children }) {
     }
   }, []);
 
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
@@ -30,8 +32,17 @@ export function CartProvider({ children }) {
     setCart([]);
   };
 
+  // ✅ Count total quantity across all sizes
+  const cartCount = cart.reduce((total, item) => {
+    return (
+      total + item.sizes.reduce((sum, sizeEntry) => sum + sizeEntry.quantity, 0)
+    );
+  }, 0);
+
   return (
-    <CartContext.Provider value={{ cart, addItem, removeItem, clearCart }}>
+    <CartContext.Provider
+      value={{ cart, addItem, removeItem, clearCart, cartCount }}
+    >
       {children}
     </CartContext.Provider>
   );

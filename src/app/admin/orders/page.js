@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { toast } from "react-hot-toast"; // ✅ import toast
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -19,6 +20,36 @@ export default function AdminOrdersPage() {
     return null;
   };
 
+  const confirmAction = (id, action) => {
+    toast.custom((t) => (
+      <div className="bg-white border shadow-md rounded p-4 w-full max-w-xs">
+        <p className="text-sm text-gray-800">
+          Дали сте сигурни дека сакате да{" "}
+          <strong>{action === "accept" ? "прифатите" : "одбиете"}</strong>?
+        </p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="text-sm text-gray-600 hover:underline"
+          >
+            Откажи
+          </button>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              handleAction(id, action);
+            }}
+            className={`text-sm text-white px-3 py-1 rounded ${
+              action === "accept" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+            }`}
+          >
+            Потврди
+          </button>
+        </div>
+      </div>
+    ));
+  };
+
   const handleAction = async (id, action) => {
     const res = await fetch(`/api/orders/${id}`, {
       method: "DELETE",
@@ -28,8 +59,13 @@ export default function AdminOrdersPage() {
 
     if (res.ok) {
       setOrders((prev) => prev.filter((order) => order._id !== id));
+      toast.success(
+        action === "accept"
+          ? "✅ Нарачката е прифатена."
+          : "❌ Нарачката е одбиена."
+      );
     } else {
-      alert("Продуктот го нема на залиха! Автоматски ќе биде одбиен.");
+      toast.error("Продуктот го нема на залиха. Автоматски одбиено.");
     }
   };
 
@@ -41,7 +77,6 @@ export default function AdminOrdersPage() {
       ) : (
         <div className="space-y-6">
           {orders.map((order) => {
-            console.log("📦 Order cart contents:", order.cart);
             const total = order.cart.reduce(
               (sum, item) =>
                 sum +
@@ -75,9 +110,7 @@ export default function AdminOrdersPage() {
                 <p className="font-semibold mt-2">Производи:</p>
                 <ul className="space-y-4 mt-2 ml-2">
                   {order.cart.map((item, i) => {
-                    const firstImage = item.images?.[0];
-                    const imageUrl = getImageUrl(firstImage);
-                    console.log("🖼️ Preview image:", firstImage, "→", imageUrl);
+                    const imageUrl = getImageUrl(item.images?.[0]);
 
                     return (
                       <li key={i} className="flex gap-4 items-start">
@@ -112,13 +145,13 @@ export default function AdminOrdersPage() {
 
                 <div className="mt-4 flex gap-4">
                   <button
-                    onClick={() => handleAction(order._id, "accept")}
+                    onClick={() => confirmAction(order._id, "accept")}
                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                   >
                     Прифати
                   </button>
                   <button
-                    onClick={() => handleAction(order._id, "decline")}
+                    onClick={() => confirmAction(order._id, "decline")}
                     className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
                   >
                     Одбиј

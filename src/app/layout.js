@@ -3,18 +3,25 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Inter } from "next/font/google";
 import AuthProvider from "@/components/AuthProvider";
-import { CartProvider } from "@/lib/useCart"; // ✅ ADD THIS
+import { CartProvider } from "@/lib/useCart";
+import { Toaster } from "react-hot-toast"; // ✅ import toaster
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Sportska Oprema",
   description: "Купете велосипедска опрема со белгиски квалитет.",
-  keywords: ["велосипедска опрема", "cycling jerseys", "спортска облека", "velosipedska oprema", "cycling clothing", "cyling gear"],
+  keywords: [
+    "велосипедска опрема",
+    "cycling jerseys",
+    "спортска облека",
+    "velosipedska oprema",
+    "cycling clothing",
+    "cyling gear",
+  ],
   authors: [{ name: "Aleksandar Miloshevski", url: "https://miloshevski.info" }],
   creator: "Aleksandar Miloshevski",
   metadataBase: new URL("https://sportskaoprema.mk"),
-
   openGraph: {
     title: "Sportska Oprema",
     description: "Висококвалитетна велосипедска облека достапна на sportskaoprema.mk",
@@ -36,15 +43,13 @@ export const metadata = {
   },
 };
 
-
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="mk">
       <body className={`${inter.className} bg-white text-zinc-900`}>
         <AuthProvider>
           <CartProvider>
-            {" "}
-            {/* ✅ Wrap everything inside CartProvider */}
+            <Toaster position="top-center" toastOptions={{ duration: 3000 }} /> {/* ✅ visual feedback */}
             <Navbar />
             <main className="min-h-[80vh] bg-white px-4 sm:px-8">
               {children}

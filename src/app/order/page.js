@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/useCart";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast"; // ✅ Toast import
 
 export default function OrderPage() {
   const { cart, clearCart } = useCart();
@@ -39,12 +40,12 @@ export default function OrderPage() {
       !customer.phone ||
       !customer.email
     ) {
-      alert("Пополнете ги сите полиња.");
+      toast.error("Пополнете ги сите полиња.");
       return;
     }
 
     if (cart.length === 0) {
-      alert("Кошничката е празна.");
+      toast.error("Кошничката е празна.");
       return;
     }
 
@@ -65,11 +66,11 @@ export default function OrderPage() {
     setSubmitting(false);
 
     if (res.ok) {
-      alert("Нарачката е успешно испратена!");
+      toast.success("✅ Нарачката е успешно испратена!");
       clearCart();
       router.push("/shop");
     } else {
-      alert("Грешка при нарачување.");
+      toast.error("Грешка при нарачување.");
     }
   };
 

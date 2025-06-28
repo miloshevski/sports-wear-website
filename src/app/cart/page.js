@@ -6,7 +6,6 @@ import Image from "next/image";
 
 export default function CartPage() {
   const { cart, removeItem } = useCart();
-  console.log("🧾 Cart contents:", cart);
 
   const isEmpty = cart.length === 0;
 
@@ -46,7 +45,7 @@ export default function CartPage() {
               {item.images?.[0] &&
                 (() => {
                   const imageUrl = getImageUrl(item.images[0]);
-                  console.log("🖼️ Image URL for cart item:", imageUrl);
+    
 
                   return (
                     <div className="relative w-24 h-24 shrink-0 bg-zinc-100 rounded overflow-hidden">

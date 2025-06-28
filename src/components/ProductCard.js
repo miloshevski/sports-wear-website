@@ -4,13 +4,17 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
+import { useCart } from "@/lib/useCart";
+import { toast } from "react-hot-toast"; // ✅ Toast import
 
 export default function ProductCard({ product }) {
   const { data: session } = useSession();
+  const { addItem } = useCart();
   const cloudName = "dh6mjupoi";
   const images = product.images || [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [quantities, setQuantities] = useState({});
 
   const totalStock = product.sizes?.reduce((sum, s) => sum + s.quantity, 0);
   const outOfStock = totalStock === 0;
@@ -37,15 +41,52 @@ export default function ProductCard({ product }) {
       });
 
       if (res.ok) {
-        alert("Product deleted.");
+        toast.success("🗑 Продуктот е избришан.");
         setVisible(false);
       } else {
-        alert("Failed to delete product.");
+        toast.error("Неуспешно бришење.");
       }
     } catch (err) {
       console.error(err);
-      alert("Error deleting product.");
+      toast.error("Грешка при бришење.");
     }
+  };
+
+  const handleAddToCart = () => {
+    const selectedSizes = Object.entries(quantities)
+      .filter(([, qty]) => qty > 0)
+      .map(([size, quantity]) => {
+        const matchingSize = product.sizes.find((s) => s.size === size);
+        const available = matchingSize ? matchingSize.quantity : 0;
+        return { size, quantity, available };
+      });
+
+    if (selectedSizes.length === 0) {
+      toast.error("Избери барем една големина и количина.");
+      return;
+    }
+
+    const overstocked = selectedSizes.find(
+      ({ quantity, available }) => quantity > available
+    );
+
+    if (overstocked) {
+      toast.error(
+        `Нема доволно залиха за ${overstocked.size}. Максимум е ${overstocked.available}.`
+      );
+      return;
+    }
+
+    const cartItem = {
+      productId: product._id,
+      name: product.name,
+      price: product.price,
+      sizes: selectedSizes.map(({ size, quantity }) => ({ size, quantity })),
+      images: product.images,
+    };
+
+    addItem(cartItem);
+    toast.success("✅ Додадено во кошничка!");
   };
 
   if (!visible) return null;
@@ -103,26 +144,44 @@ export default function ProductCard({ product }) {
           {product.price} Ден.
         </p>
 
-        {/* 🆕 Description */}
         {product.description && (
           <p className="text-sm text-gray-700 mt-2 line-clamp-3 min-h-[3.6em]">
             {product.description}
           </p>
         )}
 
-        <div className="mt-3">
-          <p className="text-sm font-medium text-gray-700 mb-1">Sizes:</p>
-          <div className="flex flex-wrap gap-2">
-            {product.sizes?.map((s) => (
-              <span
-                key={s._id}
-                className="border border-zinc-300 px-2 py-1 text-xs rounded bg-gray-50"
-              >
-                {s.size} ({s.quantity})
-              </span>
+        {/* Size & Quantity Inputs */}
+        {!outOfStock && (
+          <div className="mt-3">
+            <p className="text-sm font-medium text-gray-700 mb-1">
+              Одбери количина по големина:
+            </p>
+            {product.sizes.map((s) => (
+              <div key={s._id} className="flex items-center gap-3 mt-2 text-sm">
+                <span className="w-10">{s.size}</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={s.quantity}
+                  value={quantities[s.size] || ""}
+                  onChange={(e) => {
+                    let input = parseInt(e.target.value) || 0;
+                    const clamped = Math.max(0, Math.min(input, s.quantity));
+
+                    setQuantities({
+                      ...quantities,
+                      [s.size]: clamped,
+                    });
+                  }}
+                  className="border p-1 w-16 rounded"
+                />
+                <span className="text-xs text-gray-500">
+                  {s.quantity} на залиха
+                </span>
+              </div>
             ))}
           </div>
-        </div>
+        )}
 
         {/* Push buttons to bottom */}
         <div className="flex-grow" />
@@ -137,7 +196,7 @@ export default function ProductCard({ product }) {
           </button>
         )}
 
-        {/* Нарачај Button */}
+        {/* Add to cart / Out of stock button */}
         {outOfStock ? (
           <button
             disabled
@@ -146,12 +205,12 @@ export default function ProductCard({ product }) {
             ❌ Распродадено
           </button>
         ) : (
-          <Link
-            href={`/products/${product._id}`}
-            className="mt-4 block text-center bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+          <button
+            onClick={handleAddToCart}
+            className="mt-4 w-full text-center bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
           >
-            Нарачај
-          </Link>
+            ➕ Додај во кошничка
+          </button>
         )}
       </div>
     </div>
