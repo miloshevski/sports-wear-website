@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/useCart";
-import { toast } from "react-hot-toast"; // ✅ Toast import
+import { toast } from "react-hot-toast";
 
 export default function ProductCard({ product }) {
   const { data: session } = useSession();
@@ -186,17 +186,25 @@ export default function ProductCard({ product }) {
         {/* Push buttons to bottom */}
         <div className="flex-grow" />
 
-        {/* Admin Delete Button */}
+        {/* Admin-only controls */}
         {session?.user?.isAdmin && (
-          <button
-            onClick={handleDelete}
-            className="mt-4 text-sm text-red-600 hover:underline"
-          >
-            🗑 Delete Product
-          </button>
+          <div className="flex flex-col gap-1 mt-4">
+            <Link
+              href={`/admin/edit/${product._id}`}
+              className="text-sm text-yellow-600 hover:underline"
+            >
+              ✏️ Edit Product
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="text-sm text-red-600 hover:underline"
+            >
+              🗑 Delete Product
+            </button>
+          </div>
         )}
 
-        {/* Add to cart / Out of stock button */}
+        {/* Add to cart / Out of stock */}
         {outOfStock ? (
           <button
             disabled
