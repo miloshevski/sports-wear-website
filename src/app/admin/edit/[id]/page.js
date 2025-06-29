@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { CldUploadButton } from "next-cloudinary";
 import Image from "next/image";
 
 export default function EditProductPage() {
@@ -38,30 +37,42 @@ export default function EditProductPage() {
     setProduct({ ...product, sizes: updatedSizes });
   };
 
-  const handleUpload = async (result) => {
-    const publicId = result.info.public_id;
-    const updatedImages = [...(product.images || []), publicId];
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const updatedProduct = { ...product, images: updatedImages };
-    setProduct(updatedProduct);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "nextjs_shop");
 
-    // Immediately save image update to DB
     try {
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch("https://api.cloudinary.com/v1_1/dh6mjupoi/image/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!data.public_id) throw new Error("No public_id in Cloudinary response");
+
+      const updatedImages = [...(product.images || []), data.public_id];
+      const updatedProduct = { ...product, images: updatedImages };
+      setProduct(updatedProduct);
+
+      const saveRes = await fetch(`/api/products/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedProduct),
       });
 
-      const response = await res.json();
-      console.log("💾 Image saved immediately:", response);
+      const saveData = await saveRes.json();
+      console.log("💾 Saved image update:", saveData);
 
-      if (!res.ok) {
-        alert("❌ Failed to save image to database.");
+      if (!saveRes.ok) {
+        alert("❌ Failed to save image to DB.");
       }
     } catch (err) {
-      console.error("Error saving image to DB", err);
-      alert("❌ Error occurred while saving image.");
+      console.error("❌ Upload error", err);
+      alert("❌ Error uploading image.");
     }
   };
 
@@ -214,13 +225,12 @@ export default function EditProductPage() {
                 </button>
               </div>
             ))}
-            <CldUploadButton
-              uploadPreset="nextjs_shop"
-              onUpload={handleUpload}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
               className="bg-gray-200 text-sm text-gray-800 px-3 py-2 rounded hover:bg-gray-300"
-            >
-              ➕ Upload
-            </CldUploadButton>
+            />
           </div>
         </div>
 

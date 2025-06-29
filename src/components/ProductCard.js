@@ -187,22 +187,23 @@ export default function ProductCard({ product }) {
         <div className="flex-grow" />
 
         {/* Admin-only controls */}
-        {session?.user?.isAdmin && (
-          <div className="flex flex-col gap-1 mt-4">
-            <Link
-              href={`/admin/edit/${product._id}`}
-              className="text-sm text-yellow-600 hover:underline"
-            >
-              ✏️ Edit Product
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="text-sm text-red-600 hover:underline"
-            >
-              🗑 Delete Product
-            </button>
-          </div>
-        )}
+       {session?.user?.isAdmin && (
+  <div className="flex gap-2 mt-4">
+    <Link
+      href={`/admin/edit/${product._id}`}
+      className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+    >
+      ✏️ Edit
+    </Link>
+    <button
+      onClick={handleDelete}
+      className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
+    >
+      🗑 Delete
+    </button>
+  </div>
+)}
+
 
         {/* Add to cart / Out of stock */}
         {outOfStock ? (
