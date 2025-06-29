@@ -227,6 +227,9 @@ export default function AddProductPage() {
                 <option value="L">L</option>
                 <option value="XL">XL</option>
                 <option value="2XL">2XL</option>
+                <option value="3XL">3XL</option>
+                <option value="4XL">4XL</option>
+                <option value="5XL">5XL</option>
               </select>
               <input
                 type="number"
