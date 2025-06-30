@@ -94,7 +94,8 @@ export default function ProductCard({ product }) {
   return (
     <div className="w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
       {/* Image Slider */}
-      <div className="relative w-full h-[280px] bg-zinc-100 shrink-0">
+      {/* Image Slider */}
+      <div className="relative w-full h-[280px] bg-zinc-100 shrink-0 flex items-center justify-center overflow-hidden">
         {outOfStock && (
           <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full z-20 shadow">
             ❌ Распродадено
@@ -105,21 +106,23 @@ export default function ProductCard({ product }) {
             <Image
               src={getImageUrl(images[currentIndex])}
               alt={product.name}
-              fill
-              className="object-cover"
+              width={300}
+              height={250}
+              className="object-contain max-h-[260px]"
               loading="lazy"
             />
             {images.length > 1 && (
               <>
                 <button
                   onClick={handlePrev}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white px-2 py-1 rounded-full text-sm z-10"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-xl z-10 hover:bg-black/70 transition"
                 >
                   ‹
                 </button>
+
                 <button
                   onClick={handleNext}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white px-2 py-1 rounded-full text-sm z-10"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-xl z-10 hover:bg-black/70 transition"
                 >
                   ›
                 </button>
@@ -130,8 +133,9 @@ export default function ProductCard({ product }) {
           <Image
             src="/placeholder.jpg"
             alt="No image"
-            fill
-            className="object-contain"
+            width={300}
+            height={250}
+            className="object-contain max-h-[260px]"
           />
         )}
       </div>
