@@ -150,60 +150,98 @@ export default function ProductCard({ product }) {
           </p>
         )}
 
-        {/* Size & Quantity Inputs */}
+        {/* Modern Size & Quantity UI */}
         {!outOfStock && (
-          <div className="mt-3">
-            <p className="text-sm font-medium text-gray-700 mb-1">
-              Одбери количина по големина:
+          <div className="mt-4">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              Одбери големина:
             </p>
-            {product.sizes.map((s) => (
-              <div key={s._id} className="flex items-center gap-3 mt-2 text-sm">
-                <span className="w-10">{s.size}</span>
-                <input
-                  type="number"
-                  min={0}
-                  max={s.quantity}
-                  value={quantities[s.size] || ""}
-                  onChange={(e) => {
-                    let input = parseInt(e.target.value) || 0;
-                    const clamped = Math.max(0, Math.min(input, s.quantity));
+            <div className="flex flex-wrap gap-2 mb-4">
+              {product.sizes.map((s) => {
+                const isSelected = quantities[s.size] > 0;
+                return (
+                  <button
+                    key={s._id}
+                    type="button"
+                    disabled={s.quantity === 0}
+                    onClick={() => {
+                      setQuantities((prev) => ({
+                        ...prev,
+                        [s.size]: prev[s.size] > 0 ? 0 : 1,
+                      }));
+                    }}
+                    className={`border rounded px-3 py-1 text-sm font-medium transition ${
+                      s.quantity === 0
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : isSelected
+                          ? "bg-blue-600 text-white"
+                          : "hover:bg-blue-100 text-blue-700 border-blue-300"
+                    }`}
+                  >
+                    {s.size}{" "}
+                    <span className="ml-1 text-xs text-gray-500">
+                      ({s.quantity})
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-                    setQuantities({
-                      ...quantities,
-                      [s.size]: clamped,
-                    });
-                  }}
-                  className="border p-1 w-16 rounded"
-                />
-                <span className="text-xs text-gray-500">
-                  {s.quantity} на залиха
-                </span>
-              </div>
-            ))}
+            {/* Quantity dropdowns for selected sizes */}
+            {Object.entries(quantities)
+              .filter(([, qty]) => qty > 0)
+              .map(([size]) => {
+                const maxQty =
+                  product.sizes.find((s) => s.size === size)?.quantity || 1;
+                return (
+                  <div
+                    key={size}
+                    className="flex items-center gap-2 text-sm mb-2"
+                  >
+                    <label className="w-20">{size} количина:</label>
+                    <select
+                      className="border rounded p-1"
+                      value={quantities[size]}
+                      onChange={(e) =>
+                        setQuantities({
+                          ...quantities,
+                          [size]: parseInt(e.target.value),
+                        })
+                      }
+                    >
+                      {Array.from({ length: maxQty }, (_, i) => i + 1).map(
+                        (val) => (
+                          <option key={val} value={val}>
+                            {val}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                );
+              })}
           </div>
         )}
 
-        {/* Push buttons to bottom */}
         <div className="flex-grow" />
 
         {/* Admin-only controls */}
-       {session?.user?.isAdmin && (
-  <div className="flex gap-2 mt-4">
-    <Link
-      href={`/admin/edit/${product._id}`}
-      className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-    >
-      ✏️ Edit
-    </Link>
-    <button
-      onClick={handleDelete}
-      className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
-    >
-      🗑 Delete
-    </button>
-  </div>
-)}
-
+        {session?.user?.isAdmin && (
+          <div className="flex gap-2 mt-4">
+            <Link
+              href={`/admin/edit/${product._id}`}
+              className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+            >
+              ✏️ Edit
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
+            >
+              🗑 Delete
+            </button>
+          </div>
+        )}
 
         {/* Add to cart / Out of stock */}
         {outOfStock ? (
