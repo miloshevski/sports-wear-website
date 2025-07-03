@@ -7,7 +7,15 @@ export async function POST(req) {
     await connectDB();
     const body = await req.json();
 
-    const product = await Product.create(body);
+    // 🧠 Find the current max order
+    const lastProduct = await Product.findOne().sort({ order: -1 });
+    const nextOrder = lastProduct ? lastProduct.order + 1 : 1;
+
+    // 🆕 Create product with correct order
+    const product = await Product.create({
+      ...body,
+      order: nextOrder,
+    });
 
     return NextResponse.json(product, { status: 201 });
   } catch (err) {
