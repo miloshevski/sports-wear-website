@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useCart } from "@/lib/useCart";
 import { toast } from "react-hot-toast";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, onReorder, isFirst, isLast }) {
   const { data: session } = useSession();
   const { addItem } = useCart();
   const cloudName = "dh6mjupoi";
@@ -92,8 +92,7 @@ export default function ProductCard({ product }) {
   if (!visible) return null;
 
   return (
-    <div className="w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-      {/* Image Slider */}
+    <div className="relative w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
       {/* Image Slider */}
       <div className="relative w-full h-[280px] bg-zinc-100 shrink-0 flex items-center justify-center overflow-hidden">
         {outOfStock && (
@@ -154,7 +153,7 @@ export default function ProductCard({ product }) {
           </p>
         )}
 
-        {/* Modern Size & Quantity UI */}
+        {/* Sizes & Quantities */}
         {!outOfStock && (
           <div className="mt-4">
             <p className="text-sm font-medium text-gray-700 mb-2">
@@ -182,16 +181,13 @@ export default function ProductCard({ product }) {
                           : "hover:bg-blue-100 text-blue-700 border-blue-300"
                     }`}
                   >
-                    {s.size}{" "}
-                    <span className="ml-1 text-xs text-gray-500">
-                      ({s.quantity})
-                    </span>
+                    {s.size}
                   </button>
                 );
               })}
             </div>
 
-            {/* Quantity dropdowns for selected sizes */}
+            {/* Quantity Dropdowns */}
             {Object.entries(quantities)
               .filter(([, qty]) => qty > 0)
               .map(([size]) => {
@@ -229,21 +225,44 @@ export default function ProductCard({ product }) {
 
         <div className="flex-grow" />
 
-        {/* Admin-only controls */}
+        {/* Admin-only buttons & reorder */}
         {session?.user?.isAdmin && (
-          <div className="flex gap-2 mt-4">
-            <Link
-              href={`/admin/edit/${product._id}`}
-              className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-            >
-              ✏️ Edit
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
-            >
-              🗑 Delete
-            </button>
+          <div className="flex justify-between items-center mt-4">
+            <div className="flex gap-2">
+              <Link
+                href={`/admin/edit/${product._id}`}
+                className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+              >
+                ✏️ Edit
+              </Link>
+              <button
+                onClick={handleDelete}
+                className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
+              >
+                🗑 Delete
+              </button>
+            </div>
+
+            {/* Reorder buttons */}
+            {onReorder && (
+              <div className="flex gap-2">
+                <button
+                  disabled={isFirst}
+                  onClick={() => onReorder("forward")}
+                  className="text-2xl transition-transform duration-200 hover:scale-110 disabled:opacity-30"
+                >
+                  ⏪
+                </button>
+
+                <button
+                  disabled={isLast}
+                  onClick={() => onReorder("backward")}
+                  className="text-2xl transition-transform duration-200 hover:scale-110 disabled:opacity-30"
+                >
+                  ⏩
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -260,7 +279,7 @@ export default function ProductCard({ product }) {
             onClick={handleAddToCart}
             className="mt-4 w-full text-center bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
           >
-            ➕ Додај во кошничка
+            + Додај во кошничка
           </button>
         )}
       </div>

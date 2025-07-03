@@ -22,7 +22,9 @@ function ShopContent() {
       const productsData = await productRes.json();
       const categoryData = await categoryRes.json();
 
-      setProducts(productsData);
+      // ✅ Sort products by order before setting them
+      const sortedProducts = productsData.sort((a, b) => b.order - a.order);
+      setProducts(sortedProducts);
       setCategories(categoryData.map((c) => c.name));
 
       if (
@@ -30,12 +32,12 @@ function ShopContent() {
         categoryData.some((c) => c.name === initialCategory)
       ) {
         setSelectedCategories([initialCategory]);
-        const filtered = productsData.filter(
+        const filtered = sortedProducts.filter(
           (product) => product.category === initialCategory
         );
         setFilteredProducts(filtered);
       } else {
-        setFilteredProducts(productsData);
+        setFilteredProducts(sortedProducts);
       }
     }
 
@@ -62,6 +64,26 @@ function ShopContent() {
         ? prev.filter((c) => c !== category)
         : [...prev, category]
     );
+  };
+
+  const handleReorder = async (productId, direction) => {
+    try {
+      const res = await fetch("/api/products/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, direction }),
+      });
+
+      if (res.ok) {
+        const updated = await fetch("/api/products");
+        const updatedProducts = await updated.json();
+
+        const sorted = updatedProducts.sort((a, b) => b.order - a.order);
+        setProducts(sorted);
+      }
+    } catch (error) {
+      console.error("Reordering failed:", error);
+    }
   };
 
   return (
@@ -97,8 +119,14 @@ function ShopContent() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
-        {filteredProducts.map((product) => (
-          <ProductCard key={product._id} product={product} />
+        {filteredProducts.map((product, index) => (
+          <ProductCard
+            key={product._id}
+            product={product}
+            onReorder={(dir) => handleReorder(product._id, dir)}
+            isFirst={index === 0}
+            isLast={index === filteredProducts.length - 1}
+          />
         ))}
       </div>
     </div>
