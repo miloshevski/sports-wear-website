@@ -13,6 +13,7 @@ function ShopContent() {
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [maxPrice, setMaxPrice] = useState("");
+  const [sortOption, setSortOption] = useState("order");
 
   useEffect(() => {
     async function fetchData() {
@@ -45,7 +46,7 @@ function ShopContent() {
   }, [initialCategory]);
 
   useEffect(() => {
-    const filtered = products.filter((product) => {
+    let filtered = products.filter((product) => {
       const matchCategory =
         selectedCategories.length === 0 ||
         selectedCategories.includes(product.category);
@@ -55,8 +56,27 @@ function ShopContent() {
       return matchCategory && matchPrice;
     });
 
+    // 🔀 Sort based on the selected option
+    switch (sortOption) {
+      case "createdAt":
+        filtered = [...filtered].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        break;
+      case "priceAsc":
+        filtered = [...filtered].sort((a, b) => a.price - b.price);
+        break;
+      case "priceDesc":
+        filtered = [...filtered].sort((a, b) => b.price - a.price);
+        break;
+      case "order":
+      default:
+        filtered = [...filtered].sort((a, b) => b.order - a.order);
+        break;
+    }
+
     setFilteredProducts(filtered);
-  }, [selectedCategories, maxPrice, products]);
+  }, [selectedCategories, maxPrice, products, sortOption]);
 
   const handleCategoryChange = (category) => {
     setSelectedCategories((prev) =>
@@ -115,6 +135,19 @@ function ShopContent() {
             placeholder="Внеси максимална цена"
             className="border border-gray-300 rounded px-3 py-1"
           />
+        </div>
+        <div className="mb-4">
+          <label className="mr-2 font-semibold">Сортирај:</label>
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="border border-gray-300 rounded px-2 py-1"
+          >
+            <option value="order">Стандардно</option>
+            <option value="createdAt">По датум на додавање</option>
+            <option value="priceAsc">Цена растечки</option>
+            <option value="priceDesc">Цена опаѓачки</option>
+          </select>
         </div>
       </div>
 
