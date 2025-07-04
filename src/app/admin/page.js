@@ -29,7 +29,7 @@ export default async function AdminPage() {
         <div className="flex flex-col items-center gap-5">
           <Link href="/admin/add">
             <button className="w-64 py-4 text-lg bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-md">
-              ➕ Додади продукт
+              + Додади продукт
             </button>
           </Link>
 

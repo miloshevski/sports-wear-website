@@ -41,6 +41,23 @@ export default async function Home() {
           Прегледајте ја нашата колекција
         </Link>
       </section>
+      {/* Size Shortcuts */}
+<section className="mt-16 sm:mt-24">
+  <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">
+    Купувај по големина
+  </h2>
+  <div className="flex flex-wrap justify-center gap-4">
+    {["XS", "S", "M", "L", "XL", "2XL"].map((size) => (
+      <Link
+        key={size}
+        href={`/shop?size=${encodeURIComponent(size)}`}
+        className="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-full transition font-semibold"
+      >
+        {size}
+      </Link>
+    ))}
+  </div>
+</section>
 
       {/* Featured Categories */}
       <section className="mt-16 sm:mt-24">
