@@ -56,6 +56,35 @@ export default function OrderHistoryPage() {
     fetchHistory();
   }, []);
 
+  const handlePrint = (id) => {
+    const el = document.getElementById(`history-print-${id}`);
+    if (!el) return;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Печатење Историја</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; }
+          </style>
+        </head>
+        <body>
+          ${el.innerHTML}
+          <script>
+            window.onload = () => {
+              window.print();
+              window.onafterprint = () => window.close();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <h1 className="text-3xl font-bold mb-6">📦 Историја на Нарачки</h1>
@@ -104,39 +133,49 @@ export default function OrderHistoryPage() {
                 : "border-red-500 bg-white dark:bg-gray-800"
             }`}
           >
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h3 className="text-lg font-semibold">{order.name}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {order.phone}
-                </p>
+            <div id={`history-print-${order._id}`}>
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h3 className="text-lg font-semibold">{order.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {order.phone}
+                  </p>
+                </div>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                    order.status === "accepted"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {order.status === "accepted" ? "Прифатена" : "Одбиена"}
+                </span>
               </div>
-              <span
-                className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                  order.status === "accepted"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {order.status === "accepted" ? "Прифатена" : "Одбиена"}
-              </span>
+              <p className="text-sm mb-2 text-gray-600 dark:text-gray-300">
+                {order.address}
+              </p>
+              <ul className="text-sm mb-3 text-gray-700 dark:text-gray-200 list-disc list-inside">
+                {order.products.map((p, i) => (
+                  <li key={i}>
+                    {p.name} - {p.size} ({p.quantity})
+                  </li>
+                ))}
+              </ul>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                Вкупно: {order.total} ден
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {new Date(order.createdAt).toLocaleString("mk-MK")}
+              </p>
             </div>
-            <p className="text-sm mb-2 text-gray-600 dark:text-gray-300">
-              {order.address}
-            </p>
-            <ul className="text-sm mb-3 text-gray-700 dark:text-gray-200 list-disc list-inside">
-              {order.products.map((p, i) => (
-                <li key={i}>
-                  {p.name} - {p.size} ({p.quantity})
-                </li>
-              ))}
-            </ul>
-            <p className="font-semibold text-gray-900 dark:text-white">
-              Вкупно: {order.total} ден
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {new Date(order.createdAt).toLocaleString("mk-MK")}
-            </p>
+
+            {/* 🖨️ Print Button */}
+            <button
+              onClick={() => handlePrint(order._id)}
+              className="mt-4 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+            >
+              🖨️ Печати
+            </button>
           </div>
         ))}
       </div>

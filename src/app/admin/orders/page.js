@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { toast } from "react-hot-toast"; // ✅ import toast
+import { toast } from "react-hot-toast";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -18,6 +18,36 @@ export default function AdminOrdersPage() {
       return `https://res.cloudinary.com/dh6mjupoi/image/upload/w_80,h_80,c_fill,f_auto,q_40/${publicId}`;
     }
     return null;
+  };
+
+  const handlePrint = (id) => {
+    const element = document.getElementById(`print-${id}`);
+    if (!element) return;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Печатење нарачка</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; }
+            ul { padding-left: 20px; }
+          </style>
+        </head>
+        <body>
+          ${element.innerHTML}
+          <script>
+            window.onload = function () {
+              window.print();
+              window.onafterprint = function () { window.close(); };
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const confirmAction = (id, action) => {
@@ -40,7 +70,9 @@ export default function AdminOrdersPage() {
               handleAction(id, action);
             }}
             className={`text-sm text-white px-3 py-1 rounded ${
-              action === "accept" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+              action === "accept"
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-red-600 hover:bg-red-700"
             }`}
           >
             Потврди
@@ -92,6 +124,45 @@ export default function AdminOrdersPage() {
                 key={order._id}
                 className="border p-4 rounded-lg shadow bg-white"
               >
+                {/* 👇 Content to print */}
+                <div id={`print-${order._id}`} className="hidden print:block">
+                  <h2>Нарачка</h2>
+                  <p>
+                    <strong>Име:</strong> {order.name}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {order.email}
+                  </p>
+                  <p>
+                    <strong>Телефон:</strong> {order.phone}
+                  </p>
+                  <p>
+                    <strong>Адреса:</strong> {order.address}
+                  </p>
+                  <p>
+                    <strong>Статус:</strong> {order.status}
+                  </p>
+                  <p className="font-semibold mt-2">Производи:</p>
+                  <ul className="mt-2">
+                    {order.cart.map((item, i) => (
+                      <li key={i}>
+                        <p>
+                          {item.name} – {item.price} ден
+                        </p>
+                        <ul>
+                          {item.sizes.map((s, j) => (
+                            <li key={j}>
+                              Големина {s.size}: {s.quantity} парчиња
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-4 font-bold">Вкупна сума: {total} ден</p>
+                </div>
+
+                {/* 👇 Display content */}
                 <p>
                   <strong>Име:</strong> {order.name}
                 </p>
@@ -111,7 +182,6 @@ export default function AdminOrdersPage() {
                 <ul className="space-y-4 mt-2 ml-2">
                   {order.cart.map((item, i) => {
                     const imageUrl = getImageUrl(item.images?.[0]);
-
                     return (
                       <li key={i} className="flex gap-4 items-start">
                         {imageUrl && (
@@ -155,6 +225,12 @@ export default function AdminOrdersPage() {
                     className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
                   >
                     Одбиј
+                  </button>
+                  <button
+                    onClick={() => handlePrint(order._id)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Печати
                   </button>
                 </div>
               </div>
