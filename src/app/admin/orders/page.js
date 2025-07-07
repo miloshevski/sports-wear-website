@@ -32,12 +32,52 @@ export default function AdminOrdersPage() {
         <head>
           <title>Печатење нарачка</title>
           <style>
-            body { font-family: sans-serif; padding: 20px; }
-            ul { padding-left: 20px; }
+            body {
+              font-family: Arial, sans-serif;
+              padding: 40px;
+              line-height: 1.6;
+              color: #333;
+            }
+            h2 {
+              text-align: center;
+              font-size: 20px;
+              margin-bottom: 20px;
+              text-transform: uppercase;
+            }
+            .info, .products, .total {
+              margin-bottom: 20px;
+            }
+            .info p, .products p {
+              margin: 2px 0;
+            }
+            ul {
+              list-style: none;
+              padding-left: 0;
+            }
+            .products li {
+              margin-bottom: 10px;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 5px;
+            }
+            .total {
+              font-size: 16px;
+              font-weight: bold;
+              text-align: right;
+            }
+            .print-footer {
+              margin-top: 40px;
+              text-align: center;
+              font-size: 12px;
+              color: #777;
+            }
           </style>
         </head>
         <body>
           ${element.innerHTML}
+          <div class="print-footer">
+            <p>Ви благодариме за вашата нарачка!</p>
+            <p>www.sportskaoprema.mk</p>
+          </div>
           <script>
             window.onload = function () {
               window.print();
@@ -127,39 +167,39 @@ export default function AdminOrdersPage() {
                 {/* 👇 Content to print */}
                 <div id={`print-${order._id}`} className="hidden print:block">
                   <h2>Нарачка</h2>
-                  <p>
-                    <strong>Име:</strong> {order.name}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {order.email}
-                  </p>
-                  <p>
-                    <strong>Телефон:</strong> {order.phone}
-                  </p>
-                  <p>
-                    <strong>Адреса:</strong> {order.address}
-                  </p>
-                  <p>
-                    <strong>Статус:</strong> {order.status}
-                  </p>
-                  <p className="font-semibold mt-2">Производи:</p>
-                  <ul className="mt-2">
-                    {order.cart.map((item, i) => (
-                      <li key={i}>
-                        <p>
-                          {item.name} – {item.price} ден
-                        </p>
-                        <ul>
-                          {item.sizes.map((s, j) => (
-                            <li key={j}>
-                              Големина {s.size}: {s.quantity} парчиња
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-4 font-bold">Вкупна сума: {total} ден</p>
+                  <div className="info">
+                    <p>
+                      <strong>Име:</strong> {order.name}
+                    </p>
+                    <p>
+                      <strong>Адреса:</strong> {order.address}
+                    </p>
+                    <p>
+                      <strong>Телефон:</strong> {order.phone}
+                    </p>
+                    <strong>
+                      <p className="mt-4 font-bold">Вкупна сума: {total} ден</p>
+                    </strong>
+                  </div>
+                  <div className="products">
+                    <p className="font-semibold mt-4">Производи:</p>
+                    <ul className="mt-2">
+                      {order.cart.map((item, i) => (
+                        <li key={i}>
+                          <p>
+                            {item.name} – {item.price} ден
+                          </p>
+                          <ul>
+                            {item.sizes.map((s, j) => (
+                              <li key={j}>
+                                Големина {s.size}: {s.quantity} парчиња
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
                 {/* 👇 Display content */}
@@ -175,9 +215,7 @@ export default function AdminOrdersPage() {
                 <p>
                   <strong>Адреса:</strong> {order.address}
                 </p>
-                <p>
-                  <strong>Статус:</strong> {order.status}
-                </p>
+
                 <p className="font-semibold mt-2">Производи:</p>
                 <ul className="space-y-4 mt-2 ml-2">
                   {order.cart.map((item, i) => {

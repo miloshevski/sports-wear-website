@@ -52,7 +52,6 @@ export async function POST(request) {
       })
     );
 
-
     const order = new Order({
       name,
       email,
@@ -114,7 +113,7 @@ export async function POST(request) {
 
     await resend.emails.send({
       from: process.env.EMAIL_FROM,
-      to: "collabswithana@gmail.com",
+      to: "milosevskialeksandar18@gmail.com",
       subject: "🛒 Нова нарачка во продавницата",
       html: adminHtml,
     });
