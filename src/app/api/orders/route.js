@@ -113,7 +113,7 @@ export async function POST(request) {
 
     await resend.emails.send({
       from: process.env.EMAIL_FROM,
-      to: "milosevskialeksandar18@gmail.com",
+      to: "collabswithana@gmail.com",
       subject: "🛒 Нова нарачка во продавницата",
       html: adminHtml,
     });
