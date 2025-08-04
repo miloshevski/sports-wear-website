@@ -20,19 +20,33 @@ export async function POST(req) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const result = await new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "products" },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-    Readable.from(buffer).pipe(uploadStream);
-  });
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "products", // organize uploads
+          quality: "auto", // compress image
+          transformation: [
+            { width: 1024, crop: "limit" }, // resize (keeps aspect ratio)
+          ],
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      Readable.from(buffer).pipe(uploadStream);
+    });
 
-  return NextResponse.json({
-    url: result.secure_url,
-    public_id: result.public_id,
-  });
+    return NextResponse.json({
+      url: result.secure_url,
+      public_id: result.public_id,
+    });
+  } catch (error) {
+    console.error("Cloudinary upload failed:", error);
+    return NextResponse.json(
+      { error: "Upload failed", details: error.message },
+      { status: 500 }
+    );
+  }
 }
