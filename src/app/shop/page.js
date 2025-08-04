@@ -22,15 +22,14 @@ function ShopContent() {
       const productRes = await fetch("/api/products");
       const categoryRes = await fetch("/api/categories");
 
-      const productsData = await productRes.json();
+      const productsData = await productRes.json(); // already sorted by order: 1
       const categoryData = await categoryRes.json();
 
-      const sortedProducts = productsData.sort((a, b) => b.order - a.order);
-      setProducts(sortedProducts);
+      setProducts(productsData);
       setCategories(categoryData.map((c) => c.name));
 
       const sizesSet = new Set();
-      sortedProducts.forEach((product) => {
+      productsData.forEach((product) => {
         if (Array.isArray(product.sizes)) {
           product.sizes.forEach((s) => sizesSet.add(s.size));
         }
@@ -49,7 +48,8 @@ function ShopContent() {
         setSelectedSizes([initialSize]);
       }
 
-      let filtered = sortedProducts;
+      // Filter after URL params
+      let filtered = productsData;
 
       if (initialCategoryMatch) {
         filtered = filtered.filter(
@@ -61,9 +61,7 @@ function ShopContent() {
         filtered = filtered.filter(
           (product) =>
             Array.isArray(product.sizes) &&
-            product.sizes.some(
-              (s) => s.size === initialSize && s.quantity > 0
-            )
+            product.sizes.some((s) => s.size === initialSize && s.quantity > 0)
         );
       }
 
@@ -74,13 +72,12 @@ function ShopContent() {
   }, []);
 
   useEffect(() => {
-    const filtered = products.filter((product) => {
+    let filtered = products.filter((product) => {
       const matchCategory =
         selectedCategories.length === 0 ||
         selectedCategories.includes(product.category);
 
-      const matchPrice =
-        !maxPrice || product.price <= parseFloat(maxPrice);
+      const matchPrice = !maxPrice || product.price <= parseFloat(maxPrice);
 
       const matchSize =
         selectedSizes.length === 0 ||
@@ -94,17 +91,19 @@ function ShopContent() {
 
     switch (sortOption) {
       case "createdAt":
-        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        filtered = filtered.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
         break;
       case "priceAsc":
-        filtered.sort((a, b) => a.price - b.price);
+        filtered = filtered.sort((a, b) => a.price - b.price);
         break;
       case "priceDesc":
-        filtered.sort((a, b) => b.price - a.price);
+        filtered = filtered.sort((a, b) => b.price - a.price);
         break;
       case "order":
       default:
-        filtered.sort((a, b) => b.order - a.order);
+        // ✅ No need to sort here; server already sorted
         break;
     }
 
@@ -121,9 +120,7 @@ function ShopContent() {
 
   const handleSizeChange = (size) => {
     setSelectedSizes((prev) =>
-      prev.includes(size)
-        ? prev.filter((s) => s !== size)
-        : [...prev, size]
+      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
     );
   };
 
@@ -138,8 +135,7 @@ function ShopContent() {
       if (res.ok) {
         const updated = await fetch("/api/products");
         const updatedProducts = await updated.json();
-        const sorted = updatedProducts.sort((a, b) => b.order - a.order);
-        setProducts(sorted);
+        setProducts(updatedProducts); // ✅ use server-sorted array directly
       }
     } catch (error) {
       console.error("Reordering failed:", error);
