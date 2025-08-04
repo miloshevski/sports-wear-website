@@ -25,16 +25,34 @@ function SortableItem({ product }) {
     transition,
   };
 
+  const imagePublicId = product.images?.[0]; // first image only
+  const imageUrl = imagePublicId
+    ? `https://res.cloudinary.com/dh6mjupoi/image/upload/w_100,h_100,c_fill/${imagePublicId}.jpg`
+    : null;
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-white p-4 rounded shadow mb-2 cursor-move"
+      className="bg-white p-3 rounded shadow mb-2 cursor-move flex items-center gap-4"
     >
-      <p className="font-semibold">{product.name}</p>
-      <p className="text-sm text-gray-500">Order: {product.order}</p>
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={product.name}
+          className="w-16 h-16 object-cover rounded"
+        />
+      ) : (
+        <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500">
+          no image
+        </div>
+      )}
+      <div>
+        <p className="font-semibold">{product.name}</p>
+        <p className="text-sm text-gray-500">Order: {product.order}</p>
+      </div>
     </div>
   );
 }

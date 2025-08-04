@@ -33,6 +33,12 @@ export default async function AdminPage() {
             </button>
           </Link>
 
+          <Link href="/admin/products">
+            <button className="w-64 py-4 text-lg bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-all shadow-md">
+              🔀 Сортирај продукти
+            </button>
+          </Link>
+
           <Link href="/admin/orders">
             <button className="w-64 py-4 text-lg bg-green-600 hover:bg-green-700 text-white rounded-xl transition-all shadow-md">
               📦 Прегледај нарачки
