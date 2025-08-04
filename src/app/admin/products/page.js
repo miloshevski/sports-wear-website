@@ -7,6 +7,7 @@ import {
   useSensor,
   useSensors,
   PointerSensor,
+  TouchSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -16,16 +17,19 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+// Sortable item
 function SortableItem({ product }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: product._id });
+    useSortable({ id: product._id, dragHandle: true });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    // Note: we allow scroll interactions on the card,
+    // only the handle has touchAction blocked.
   };
 
-  const imagePublicId = product.images?.[0]; // first image only
+  const imagePublicId = product.images?.[0];
   const imageUrl = imagePublicId
     ? `https://res.cloudinary.com/dh6mjupoi/image/upload/w_100,h_100,c_fill/${imagePublicId}.jpg`
     : null;
@@ -35,9 +39,9 @@ function SortableItem({ product }) {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
-      className="bg-white p-3 rounded shadow mb-2 cursor-move flex items-center gap-4"
+      className="bg-white p-3 rounded shadow mb-2 flex items-center gap-4"
     >
+      {/* Product Image */}
       {imageUrl ? (
         <img
           src={imageUrl}
@@ -49,24 +53,45 @@ function SortableItem({ product }) {
           no image
         </div>
       )}
+
+      {/* Product Info */}
       <div>
         <p className="font-semibold">{product.name}</p>
         <p className="text-sm text-gray-500">Order: {product.order}</p>
       </div>
+
+      {/* Drag Handle (on the right) */}
+      <span
+        {...listeners}
+        data-dnd-kit-handle
+        className="ml-auto cursor-grab text-xl text-gray-400 hover:text-gray-600 active:cursor-grabbing touch-none"
+        title="Move"
+      >
+        ☰
+      </span>
     </div>
   );
 }
 
 export default function AdminProductPage() {
   const [products, setProducts] = useState([]);
-  const sensors = useSensors(useSensor(PointerSensor));
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    })
+  );
 
   useEffect(() => {
     console.log("📦 Fetching products...");
     fetch("/api/products")
       .then((res) => res.json())
       .then((data) => {
-        const sorted = [...data].sort((a, b) => a.order - b.order); // ✅ important fix
+        const sorted = [...data].sort((a, b) => a.order - b.order);
         console.log(
           "✅ Products sorted by order:",
           sorted.map((p) => `${p.name} (${p.order})`)
@@ -113,7 +138,7 @@ export default function AdminProductPage() {
   };
 
   return (
-    <main className="max-w-2xl mx-auto mt-10">
+    <main className="max-w-2xl mx-auto mt-10 px-4">
       <h1 className="text-2xl font-bold mb-4">🛠️ Подреди Производи</h1>
 
       <DndContext

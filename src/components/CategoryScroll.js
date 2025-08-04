@@ -8,8 +8,7 @@ export default function CategoryScroll() {
   const [categories, setCategories] = useState([]);
   const pathname = usePathname();
 
-  if (pathname !== "/") return null;
-
+  // ✅ Always call hooks before any return
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -23,6 +22,9 @@ export default function CategoryScroll() {
 
     fetchCategories();
   }, []);
+
+  // ✅ Conditional return comes after all hooks
+  if (pathname !== "/") return null;
 
   return (
     <div className="w-full bg-white border-t border-b border-zinc-200 shadow-sm overflow-x-auto">
