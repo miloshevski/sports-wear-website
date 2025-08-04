@@ -18,7 +18,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 // Sortable item
-function SortableItem({ product }) {
+function SortableItem({ product, totalLength }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: product._id, dragHandle: true });
 
@@ -57,7 +57,9 @@ function SortableItem({ product }) {
       {/* Product Info */}
       <div>
         <p className="font-semibold">{product.name}</p>
-        <p className="text-sm text-gray-500">Order: {product.order}</p>
+        <p className="text-sm text-gray-500">
+          Order: {Math.abs(product.order - totalLength - 1)}
+        </p>
       </div>
 
       {/* Drag Handle (on the right) */}
@@ -150,9 +152,16 @@ export default function AdminProductPage() {
           items={products.map((p) => p._id)}
           strategy={verticalListSortingStrategy}
         >
-          {products.map((product) => (
-            <SortableItem key={product._id} product={product} />
-          ))}
+          {products
+            .slice()
+            .reverse()
+            .map((product) => (
+              <SortableItem
+                key={product._id}
+                product={product}
+                totalLength={products.length}
+              />
+            ))}
         </SortableContext>
       </DndContext>
     </main>

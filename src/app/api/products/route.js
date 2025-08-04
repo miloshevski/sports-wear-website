@@ -30,8 +30,8 @@ export async function POST(req) {
 export async function GET() {
   try {
     await connectDB();
-    // 🔁 Sort by `order` in descending order
-    const products = await Product.find().sort({ order: 1 });
+    // 🔁 Sort by `order` in ascending order
+    const products = await Product.find().sort({ order: -1 });
 
     return NextResponse.json(products);
   } catch (err) {
