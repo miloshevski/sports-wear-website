@@ -6,30 +6,31 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/useCart";
 import { toast } from "react-hot-toast";
+import { useKeenSlider } from "keen-slider/react";
+import "keen-slider/keen-slider.min.css";
 
 export default function ProductCard({ product, onReorder, isFirst, isLast }) {
   const { data: session } = useSession();
   const { addItem } = useCart();
   const cloudName = "dh6mjupoi";
   const images = product.images || [];
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const [quantities, setQuantities] = useState({});
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const [sliderRef, instanceRef] = useKeenSlider({
+    loop: true,
+    slides: { perView: 1 },
+    slideChanged(s) {
+      setCurrentSlide(s.track.details.rel);
+    },
+  });
 
   const totalStock = product.sizes?.reduce((sum, s) => sum + s.quantity, 0);
   const outOfStock = totalStock === 0;
 
-  const getImageUrl = (publicId) => {
-    return `https://res.cloudinary.com/${cloudName}/image/upload/w_600,c_fit,f_auto,q_auto/${publicId}`;
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  const getImageUrl = (publicId) =>
+    `https://res.cloudinary.com/${cloudName}/image/upload/w_600,c_fit,f_auto,q_auto/${publicId}`;
 
   const handleDelete = async () => {
     const confirmed = window.confirm(`Delete product "${product.name}"?`);
@@ -93,53 +94,74 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
 
   return (
     <div className="relative w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-      {/* Image Slider */}
-      <div className="relative w-full h-[280px] bg-zinc-100 shrink-0 flex items-center justify-center overflow-hidden">
-        {outOfStock && (
-          <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full z-20 shadow">
-            ❌ Распродадено
-          </span>
-        )}
-        {images.length > 0 ? (
-          <>
-            <Image
-              src={getImageUrl(images[currentIndex])}
-              alt={product.name}
-              width={300}
-              height={250}
-              className="object-contain max-h-[260px]"
-              loading="lazy"
-            />
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={handlePrev}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-xl z-10 hover:bg-black/70 transition"
-                >
-                  ‹
-                </button>
+      {/* Slider */}
+      <div className="relative h-64 bg-white flex items-center justify-center">
+        <div ref={sliderRef} className="keen-slider h-64">
+          {images.length > 0 ? (
+            images.map((img, index) => (
+              <div
+                key={index}
+                className="keen-slider__slide flex justify-center items-center"
+              >
+                <Image
+                  src={getImageUrl(img)}
+                  alt={product.name}
+                  width={300}
+                  height={250}
+                  className="object-contain w-full h-64"
+                />
+              </div>
+            ))
+          ) : (
+            <div className="keen-slider__slide flex justify-center items-center">
+              <Image
+                src="/placeholder.jpg"
+                alt="No image"
+                width={300}
+                height={250}
+                className="object-contain w-full h-64"
+              />
+            </div>
+          )}
+        </div>
 
-                <button
-                  onClick={handleNext}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-xl z-10 hover:bg-black/70 transition"
-                >
-                  ›
-                </button>
-              </>
-            )}
+        {/* Arrows */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={() => instanceRef.current?.prev()}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10 transition hidden sm:block"
+              aria-label="Previous image"
+            >
+              ←
+            </button>
+            <button
+              onClick={() => instanceRef.current?.next()}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10 transition hidden sm:block"
+              aria-label="Next image"
+            >
+              →
+            </button>
           </>
-        ) : (
-          <Image
-            src="/placeholder.jpg"
-            alt="No image"
-            width={300}
-            height={250}
-            className="object-contain max-h-[260px]"
-          />
         )}
       </div>
 
-      {/* Product Info */}
+      {/* Dots */}
+      {images.length > 1 && (
+        <div className="flex justify-center mt-2 mb-1">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => instanceRef.current?.moveToIdx(index)}
+              className={`h-2 w-2 mx-1 rounded-full transition ${
+                currentSlide === index ? "bg-blue-600 scale-125" : "bg-gray-300"
+              }`}
+            ></button>
+          ))}
+        </div>
+      )}
+
+      {/* Info */}
       <div className="p-4 flex flex-col h-full">
         <h2 className="text-lg font-semibold text-zinc-800">{product.name}</h2>
         <p className="text-sm text-gray-500 capitalize">{product.category}</p>
@@ -153,7 +175,6 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
           </p>
         )}
 
-        {/* Sizes & Quantities */}
         {!outOfStock && (
           <div className="mt-4">
             <p className="text-sm font-medium text-gray-700 mb-2">
@@ -167,12 +188,12 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
                     key={s._id}
                     type="button"
                     disabled={s.quantity === 0}
-                    onClick={() => {
+                    onClick={() =>
                       setQuantities((prev) => ({
                         ...prev,
                         [s.size]: prev[s.size] > 0 ? 0 : 1,
-                      }));
-                    }}
+                      }))
+                    }
                     className={`border rounded px-3 py-1 text-sm font-medium transition ${
                       s.quantity === 0
                         ? "bg-gray-200 text-gray-500 cursor-not-allowed"
@@ -187,7 +208,6 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
               })}
             </div>
 
-            {/* Quantity Dropdowns */}
             {Object.entries(quantities)
               .filter(([, qty]) => qty > 0)
               .map(([size]) => {
@@ -225,7 +245,6 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
 
         <div className="flex-grow" />
 
-        {/* Admin-only buttons & reorder */}
         {session?.user?.isAdmin && (
           <div className="flex justify-between items-center mt-4">
             <div className="flex gap-2">
@@ -243,7 +262,6 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
               </button>
             </div>
 
-            {/* Reorder buttons */}
             {onReorder && (
               <div className="flex gap-2">
                 <button
@@ -253,7 +271,6 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
                 >
                   ⏪
                 </button>
-
                 <button
                   disabled={isLast}
                   onClick={() => onReorder("backward")}
@@ -266,7 +283,6 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
           </div>
         )}
 
-        {/* Add to cart / Out of stock */}
         {outOfStock ? (
           <button
             disabled
