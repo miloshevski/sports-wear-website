@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,6 +18,17 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
   const [quantities, setQuantities] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const sizeOrder = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+  const sizeRank = (size) => {
+    const i = sizeOrder.indexOf(size);
+    return i === -1 ? 999 : i;
+  };
+
+  const sortedSizes = useMemo(() => {
+    const list = Array.isArray(product.sizes) ? product.sizes : [];
+    return [...list].sort((a, b) => sizeRank(a.size) - sizeRank(b.size));
+  }, [product.sizes]);
+
   const [sliderRef, instanceRef] = useKeenSlider({
     loop: true,
     slides: { perView: 1 },
@@ -26,7 +37,8 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
     },
   });
 
-  const totalStock = product.sizes?.reduce((sum, s) => sum + s.quantity, 0);
+  const totalStock =
+    product.sizes?.reduce((sum, s) => sum + s.quantity, 0) ?? 0;
   const outOfStock = totalStock === 0;
 
   const getImageUrl = (publicId) =>
@@ -156,7 +168,8 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
               className={`h-2 w-2 mx-1 rounded-full transition ${
                 currentSlide === index ? "bg-blue-600 scale-125" : "bg-gray-300"
               }`}
-            ></button>
+              aria-label={`Go to slide ${index + 1}`}
+            />
           ))}
         </div>
       )}
@@ -180,8 +193,10 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
             <p className="text-sm font-medium text-gray-700 mb-2">
               Одбери големина:
             </p>
+
+            {/* Size buttons (sorted) */}
             <div className="flex flex-wrap gap-2 mb-4">
-              {product.sizes.map((s) => {
+              {sortedSizes.map((s) => {
                 const isSelected = quantities[s.size] > 0;
                 return (
                   <button
@@ -208,8 +223,10 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
               })}
             </div>
 
+            {/* Quantity selectors (sorted by size order as well) */}
             {Object.entries(quantities)
               .filter(([, qty]) => qty > 0)
+              .sort(([sizeA], [sizeB]) => sizeRank(sizeA) - sizeRank(sizeB))
               .map(([size]) => {
                 const maxQty =
                   product.sizes.find((s) => s.size === size)?.quantity || 1;
@@ -218,7 +235,7 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
                     key={size}
                     className="flex items-center gap-2 text-sm mb-2"
                   >
-                    <label className="w-20">{size} количина:</label>
+                    <label className="w-24">{size} количина:</label>
                     <select
                       className="border rounded p-1"
                       value={quantities[size]}
