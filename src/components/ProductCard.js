@@ -93,9 +93,9 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
   if (!visible) return null;
 
   return (
-    <div className="relative w-full max-w-[500px] bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+    <div className="relative w-full bg-white border border-zinc-200 sm:shadow-sm overflow-hidden flex flex-col">
       {/* Slider */}
-      <div className="relative h-64 bg-white flex items-center justify-center">
+      <div className="relative w-full h-64 bg-white flex items-center justify-center">
         <div ref={sliderRef} className="keen-slider h-64">
           {images.length > 0 ? (
             images.map((img, index) => (

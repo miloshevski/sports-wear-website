@@ -143,7 +143,7 @@ function ShopContent() {
   };
 
   return (
-    <div className="p-6">
+    <div className="sm:p-6">
       <h1 className="text-3xl font-bold mb-4">Продавница</h1>
 
       <div className="flex flex-col md:flex-row gap-8 mb-6">
