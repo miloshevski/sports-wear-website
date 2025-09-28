@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +8,8 @@ import { useCart } from "@/lib/useCart";
 import { toast } from "react-hot-toast";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
+
+const sizeOrder = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
 
 export default function ProductCard({ product, onReorder, isFirst, isLast }) {
   const { data: session } = useSession();
@@ -18,16 +20,15 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
   const [quantities, setQuantities] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const sizeOrder = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
-  const sizeRank = (size) => {
+  const sizeRank = useCallback((size) => {
     const i = sizeOrder.indexOf(size);
     return i === -1 ? 999 : i;
-  };
+  }, []);
 
   const sortedSizes = useMemo(() => {
     const list = Array.isArray(product.sizes) ? product.sizes : [];
     return [...list].sort((a, b) => sizeRank(a.size) - sizeRank(b.size));
-  }, [product.sizes]);
+  }, [product.sizes, sizeRank]);
 
   const [sliderRef, instanceRef] = useKeenSlider({
     loop: true,

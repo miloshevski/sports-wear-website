@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="mt-32 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white">
@@ -17,15 +19,15 @@ export default function Footer() {
           <div className="text-center">
             <h4 className="text-lg font-semibold mb-4 text-gray-200">Брзи врски</h4>
             <div className="space-y-2">
-              <a href="/" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200">
+              <Link href="/" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200">
                 Дома
-              </a>
-              <a href="/shop" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200">
+              </Link>
+              <Link href="/shop" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200">
                 Продавница
-              </a>
-              <a href="/cart" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200">
+              </Link>
+              <Link href="/cart" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200">
                 Кошничка
-              </a>
+              </Link>
             </div>
           </div>
 

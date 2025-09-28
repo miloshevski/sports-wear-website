@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   DndContext,
   closestCenter,
@@ -43,9 +44,11 @@ function SortableItem({ product, totalLength }) {
     >
       {/* Product Image */}
       {imageUrl ? (
-        <img
+        <Image
           src={imageUrl}
           alt={product.name}
+          width={64}
+          height={64}
           className="w-16 h-16 object-cover rounded"
         />
       ) : (
