@@ -46,12 +46,37 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="mk">
-      <body className={`${inter.className} bg-white text-zinc-900`}>
+      <body className={`${inter.className} bg-gradient-to-br from-gray-50 to-white text-gray-800 antialiased`}>
         <AuthProvider>
           <CartProvider>
-            <Toaster position="top-center" toastOptions={{ duration: 3000 }} /> {/* ✅ visual feedback */}
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  fontSize: '16px',
+                  fontWeight: '500'
+                },
+                success: {
+                  iconTheme: {
+                    primary: '#10b981',
+                    secondary: '#fff',
+                  },
+                },
+                error: {
+                  iconTheme: {
+                    primary: '#ef4444',
+                    secondary: '#fff',
+                  },
+                }
+              }}
+            />
             <Navbar />
-            <main className="min-h-[80vh] bg-white px-4 sm:px-8">
+            <main className="min-h-[80vh]">
               {children}
             </main>
             <Footer />

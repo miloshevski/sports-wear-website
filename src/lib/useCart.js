@@ -6,6 +6,7 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
+  const [mounted, setMounted] = useState(false);
 
   // Load from localStorage
   useEffect(() => {
@@ -13,6 +14,7 @@ export function CartProvider({ children }) {
     if (stored) {
       setCart(JSON.parse(stored));
     }
+    setMounted(true);
   }, []);
 
   // Save to localStorage
@@ -41,7 +43,7 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider
-      value={{ cart, addItem, removeItem, clearCart, cartCount }}
+      value={{ cart, addItem, removeItem, clearCart, cartCount, mounted }}
     >
       {children}
     </CartContext.Provider>
