@@ -221,6 +221,7 @@ export default function AddProductPage() {
                 className="w-1/2 px-3 py-2 border rounded"
               >
                 <option value="">Големина</option>
+                <option value="2XS">2XS</option>
                 <option value="XS">XS</option>
                 <option value="S">S</option>
                 <option value="M">M</option>
