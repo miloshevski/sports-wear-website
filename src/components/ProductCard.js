@@ -9,7 +9,7 @@ import { toast } from "react-hot-toast";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 
-const sizeOrder = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+const sizeOrder = ["2XS","XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
 
 export default function ProductCard({ product, onReorder, isFirst, isLast }) {
   const { data: session } = useSession();
