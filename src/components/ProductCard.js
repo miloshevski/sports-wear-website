@@ -104,7 +104,7 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
     };
 
     addItem(cartItem);
-    toast.success("✅ Додадено во кошничка!");
+    toast.success("✅ Додадено во кошничка!", { duration: 1000 });
   };
 
   if (!visible) return null;
