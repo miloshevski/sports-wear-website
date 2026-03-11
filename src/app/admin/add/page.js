@@ -19,6 +19,9 @@ export default function AddProductPage() {
     description: "",
     sizes: [{ size: "", quantity: "" }],
     images: [],
+    discountType: null,
+    discountValue: null,
+    discountExpiry: null,
   });
 
   const [uploading, setUploading] = useState(false);
@@ -110,6 +113,9 @@ export default function AddProductPage() {
             quantity: parseInt(s.quantity),
           })),
           images: uploadedImages,
+          discountType: form.discountType || null,
+          discountValue: form.discountValue ? parseFloat(form.discountValue) : null,
+          discountExpiry: form.discountExpiry ? new Date(form.discountExpiry) : null,
         }),
       });
 
@@ -250,6 +256,64 @@ export default function AddProductPage() {
           >
             + Додади големина
           </button>
+        </div>
+
+        {/* Discount */}
+        <div className="border rounded p-4 space-y-3 bg-gray-50">
+          <label className="block font-semibold">Попуст</label>
+
+          <div className="flex gap-4 items-center flex-wrap">
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Тип на попуст</label>
+              <select
+                className="border px-3 py-2 rounded"
+                value={form.discountType || ""}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    discountType: e.target.value || null,
+                    discountValue: e.target.value ? form.discountValue : null,
+                    discountExpiry: e.target.value ? form.discountExpiry : null,
+                  })
+                }
+              >
+                <option value="">Без попуст</option>
+                <option value="percent">Процент (%)</option>
+                <option value="absolute">Фиксен износ (Ден.)</option>
+              </select>
+            </div>
+
+            {form.discountType && (
+              <>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">
+                    {form.discountType === "percent" ? "Процент %" : "Износ (Ден.)"}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="border px-3 py-2 rounded w-28"
+                    value={form.discountValue || ""}
+                    onChange={(e) =>
+                      setForm({ ...form, discountValue: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Важи до</label>
+                  <input
+                    type="date"
+                    className="border px-3 py-2 rounded"
+                    value={form.discountExpiry || ""}
+                    onChange={(e) =>
+                      setForm({ ...form, discountExpiry: e.target.value })
+                    }
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Images */}

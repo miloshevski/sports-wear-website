@@ -203,6 +203,85 @@ export default function EditProductPage() {
           </button>
         </div>
 
+        {/* Discount */}
+        <div className="border rounded p-4 space-y-3 bg-gray-50">
+          <label className="block font-medium mb-1">Попуст</label>
+
+          <div className="flex gap-4 items-center flex-wrap">
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Тип на попуст</label>
+              <select
+                className="border p-2 rounded"
+                value={product.discountType || ""}
+                onChange={(e) =>
+                  setProduct({
+                    ...product,
+                    discountType: e.target.value || null,
+                    discountValue: e.target.value ? product.discountValue : null,
+                    discountExpiry: e.target.value ? product.discountExpiry : null,
+                  })
+                }
+              >
+                <option value="">Без попуст</option>
+                <option value="percent">Процент (%)</option>
+                <option value="absolute">Фиксен износ (Ден.)</option>
+              </select>
+            </div>
+
+            {product.discountType && (
+              <>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">
+                    {product.discountType === "percent" ? "Процент %" : "Износ (Ден.)"}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="border p-2 rounded w-28"
+                    value={product.discountValue || ""}
+                    onChange={(e) =>
+                      setProduct({
+                        ...product,
+                        discountValue: parseFloat(e.target.value) || null,
+                      })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Важи до</label>
+                  <input
+                    type="date"
+                    className="border p-2 rounded"
+                    value={
+                      product.discountExpiry
+                        ? new Date(product.discountExpiry).toISOString().split("T")[0]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setProduct({
+                        ...product,
+                        discountExpiry: e.target.value ? new Date(e.target.value) : null,
+                      })
+                    }
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          {product.discountType && product.discountValue && product.discountExpiry && (
+            <p className="text-sm text-green-700">
+              Активен попуст:{" "}
+              {product.discountType === "percent"
+                ? `-${product.discountValue}%`
+                : `-${product.discountValue} Ден.`}{" "}
+              до{" "}
+              {new Date(product.discountExpiry).toLocaleDateString("mk-MK")}
+            </p>
+          )}
+        </div>
+
         {/* Image Upload */}
         <div>
           <label className="block font-medium mb-1">Слики:</label>

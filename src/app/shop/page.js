@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import ProductCard from "@/components/ProductCard";
+import { getEffectivePrice } from "@/lib/discount";
 
 function ShopContent() {
   const [products, setProducts] = useState([]);
@@ -77,7 +78,7 @@ function ShopContent() {
         selectedCategories.length === 0 ||
         selectedCategories.includes(product.category);
 
-      const matchPrice = !maxPrice || product.price <= parseFloat(maxPrice);
+      const matchPrice = !maxPrice || getEffectivePrice(product) <= parseFloat(maxPrice);
 
       const matchSize =
         selectedSizes.length === 0 ||
@@ -96,10 +97,10 @@ function ShopContent() {
         );
         break;
       case "priceAsc":
-        filtered = filtered.sort((a, b) => a.price - b.price);
+        filtered = filtered.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
         break;
       case "priceDesc":
-        filtered = filtered.sort((a, b) => b.price - a.price);
+        filtered = filtered.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
         break;
       case "order":
       default:

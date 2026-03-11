@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/useCart";
 import { toast } from "react-hot-toast";
+import { getDiscountedPrice } from "@/lib/discount";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 
@@ -41,6 +42,9 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
   const totalStock =
     product.sizes?.reduce((sum, s) => sum + s.quantity, 0) ?? 0;
   const outOfStock = totalStock === 0;
+
+  const discountedPrice = getDiscountedPrice(product);
+  const effectivePrice = discountedPrice ?? product.price;
 
   const getImageUrl = (publicId) =>
     `https://res.cloudinary.com/${cloudName}/image/upload/w_600,c_fit,f_auto,q_auto/${publicId}`;
@@ -94,7 +98,7 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
     const cartItem = {
       productId: product._id,
       name: product.name,
-      price: product.price,
+      price: effectivePrice,
       sizes: selectedSizes.map(({ size, quantity }) => ({ size, quantity })),
       images: product.images,
     };
@@ -138,6 +142,15 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
           )}
         </div>
 
+          {/* Discount badge */}
+        {discountedPrice !== null && (
+          <div className="absolute top-2 left-2 z-10 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+            {product.discountType === "percent"
+              ? `-${product.discountValue}%`
+              : `-${product.discountValue} Ден.`}
+          </div>
+        )}
+
         {/* Arrows */}
         {images.length > 1 && (
           <>
@@ -179,9 +192,16 @@ export default function ProductCard({ product, onReorder, isFirst, isLast }) {
       <div className="p-4 flex flex-col h-full">
         <h2 className="text-lg font-semibold text-zinc-800">{product.name}</h2>
         <p className="text-sm text-gray-500 capitalize">{product.category}</p>
-        <p className="text-base font-bold text-zinc-900 mt-1">
-          {product.price} Ден.
-        </p>
+        {discountedPrice !== null ? (
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-base font-bold text-red-600">{discountedPrice} Ден.</p>
+            <p className="text-sm text-gray-400 line-through">{product.price} Ден.</p>
+          </div>
+        ) : (
+          <p className="text-base font-bold text-zinc-900 mt-1">
+            {product.price} Ден.
+          </p>
+        )}
 
         {product.description && (
           <p className="text-sm text-gray-700 mt-2 line-clamp-3 min-h-[3.6em]">

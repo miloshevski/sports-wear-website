@@ -13,7 +13,10 @@ const ProductSchema = new mongoose.Schema(
     description: { type: String },
     sizes: [SizeSchema],
     images: [{ type: String }], // Cloudinary public_ids
-    order: { type: Number, default: 0 }, // <-- 🔥 NEW FIELD FOR REORDERING
+    order: { type: Number, default: 0 },
+    discountType: { type: String, enum: ["percent", "absolute"], default: null },
+    discountValue: { type: Number, default: null },
+    discountExpiry: { type: Date, default: null },
   },
   { timestamps: true }
 );
